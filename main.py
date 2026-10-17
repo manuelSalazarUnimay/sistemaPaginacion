@@ -10,12 +10,13 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Redirigir la raíz (/) automáticamente a /docs
+
 @app.get("/", include_in_schema=False)
 def root():
+    """Redirige automáticamente la raíz hacia la documentación interactiva."""
     return RedirectResponse(url="/docs")
 
-# Registrar el router de la API
+
 app.include_router(pagination_router)
 
 if __name__ == "__main__":

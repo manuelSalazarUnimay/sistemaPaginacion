@@ -3,15 +3,20 @@ from fastapi import APIRouter, Query, HTTPException, status
 
 from application.pagination_service import PaginationService
 from domain.calculator import PaginationCalculator
-from domain.exceptions import DomainException, PageOutOfBoundsException, InvalidInputException
-from infrastructure.api.dtos import PaginationResponseDTO, MemoryPageDTO
+from domain.exceptions import DomainException
+from domain.models import PageRangeAnalysis
+from infrastructure.api.dtos import (
+    PaginationResponseDTO,
+    MemoryPageDTO,
+    SegmentationInfoDTO,
+    PageRangeResponseDTO
+)
 
 router = APIRouter(prefix="/api/v1/pagination", tags=["Simulador de Paginación"])
 service = PaginationService()
 
 
-def _build_response_dto(result, requested_page: Optional[int] = None) -> PaginationResponseDTO:
-    """Helper para transformar el resultado del dominio en el DTO de respuesta de la API."""
+def _build_response_dto(result: PageRangeAnalysis, requested_page: Optional[int] = None) -> PaginationResponseDTO:
     pages_sample_dto = [
         MemoryPageDTO(
             page_number=p.page_number,
@@ -25,7 +30,6 @@ def _build_response_dto(result, requested_page: Optional[int] = None) -> Paginat
 
     requested_page_dto = None
     if requested_page is not None:
-        # Reutilizamos el servicio de aplicación para obtener el detalle de la página
         page_detail = service.get_page_detail(result, requested_page)
         requested_page_dto = MemoryPageDTO(
             page_number=page_detail.page_number,
@@ -35,15 +39,18 @@ def _build_response_dto(result, requested_page: Optional[int] = None) -> Paginat
             end_address_hex=page_detail.end_address_hex
         )
 
+    seg = result.segmentation
+
     return PaginationResponseDTO(
-        bus_bits=result.bus_bits,
-        total_pages=result.total_pages,
-        page_size_bytes=result.page_size_bytes,
-        page_size_kb=round(result.page_size_bytes / 1024, 2),
-        total_memory_bytes=result.total_memory_bytes,
-        total_memory_legible=PaginationCalculator.bytes_to_legible(result.total_memory_bytes),
+        bus_bits=seg.bus_bits,
+        total_pages=result.end_page + 1,
+        page_size_bytes=seg.page_size_bytes,
+        page_size_kb=seg.page_size_kb,
+        total_memory_bytes=seg.total_memory_bytes,
+        total_memory_legible=PaginationCalculator.bytes_to_legible(seg.total_memory_bytes),
         pages_sample=pages_sample_dto,
-        requested_page_detail=requested_page_dto
+        requested_page_detail=requested_page_dto,
+        segmentation=SegmentationInfoDTO(**seg.__dict__)
     )
 
 
@@ -97,5 +104,23 @@ def get_bus_from_pages_and_size(
     try:
         result = service.get_bus_from_pages_and_size(total_pages, page_size_kb)
         return _build_response_dto(result, requested_page)
+    except DomainException as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get(
+    "/range-didactic",
+    response_model=PageRangeResponseDTO,
+    summary="4. Análisis Didáctico de Rango de Páginas",
+    description="Calcula un bloque de páginas (start_page a end_page) y devuelve una traza pedagógica explicando el cálculo paso a paso, previniendo desbordamientos de bus."
+)
+def get_didactic_page_range(
+    bus_bits: int = Query(..., ge=1, le=128, description="Arquitectura del Bus en bits (ej: 16)"),
+    page_size_kb: float = Query(..., gt=0, description="Tamaño de página en KB (ej: 4.0)"),
+    start_page: int = Query(..., ge=0, description="Página inicial del rango (ej: 0)"),
+    end_page: int = Query(..., ge=0, description="Página final del rango (ej: 10)")
+):
+    try:
+        return service.get_didactic_page_range(bus_bits, page_size_kb, start_page, end_page)
     except DomainException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
