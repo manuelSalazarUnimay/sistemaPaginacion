@@ -1,24 +1,15 @@
-from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
-from infrastructure.api.pagination_router import router as pagination_router
+import uvicorn
+from infrastructure.api.app_factory import create_app
 
-app = FastAPI(
-    title="Simulador de Paginación de Memoria API",
-    description="API RESTful para la simulación y cálculo de mapas de memoria y paginación bajo arquitectura DDD.",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
-
-
-@app.get("/", include_in_schema=False)
-def root():
-    """Redirige automáticamente la raíz hacia la documentación interactiva."""
-    return RedirectResponse(url="/docs")
-
-
-app.include_router(pagination_router)
+# Instanciamos la aplicación delegando toda la construcción al Factory
+app = create_app()
 
 if __name__ == "__main__":
-    import uvicorn
+    print("==================================================")
+    print("🚀 Servidor iniciado exitosamente.")
+    print("💻 Aplicación Web: http://127.0.0.1:8000/")
+    print("⚙️  Swagger UI:    http://127.0.0.1:8000/docs")
+    print("==================================================")
+
+    # uvicorn recibe "main:app" como string para permitir el recargado automático (reload=True)
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
