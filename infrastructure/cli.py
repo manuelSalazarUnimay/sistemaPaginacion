@@ -1,7 +1,7 @@
 import os
 from application.pagination_service import PaginationService
 from domain.calculator import PaginationCalculator
-from domain.exceptions import DomainException
+from domain.exceptions import DomainException, PageOutOfBoundsException
 
 
 class ConsoleInterface:
@@ -18,11 +18,45 @@ class ConsoleInterface:
 
         for page in result.pages_sample:
             print(
-                f"Página {page.page_number:04d} | Inicio: {page.start_address_hex.ljust(10)} -> Fin: {page.end_address_hex}")
+                f"Página {page.page_number:04d} | Inicio: {page.start_address_hex.ljust(10)} -> Fin: {page.end_address_hex}"
+            )
 
         if result.total_pages > len(result.pages_sample):
             remaining = result.total_pages - len(result.pages_sample)
             print(f"\n... [{remaining:,} páginas adicionales no mostradas en la vista previa] ...")
+
+    def prompt_specific_page_query(self, result):
+        """Muestra el flujo interactivo de consulta solicitando los datos al servicio."""
+        print("\n" + "-" * 50)
+        print("          CONSULTA INTERACTIVA DE PÁGINAS          ")
+        print("-" * 50)
+
+        while True:
+            opcion = input("► ¿Desea consultar la información de una página específica? (s/n): ").strip().lower()
+
+            if opcion not in ('s', 'si', 'sí', 'y'):
+                break
+
+            try:
+                num_pagina = int(input(f"► Ingrese el número de página (0 a {result.total_pages - 1}): "))
+
+                # Invocación directa al servicio (Dominio realiza los cálculos y validaciones)
+                page = self.service.get_page_detail(result, num_pagina)
+
+                print("\n" + "─" * 45)
+                print(f"  DETALLE DE LA PÁGINA #{page.page_number:,}")
+                print("─" * 45)
+                print(f"  • Número de Página: {page.page_number:,}")
+                print(f"  • Dirección Inicio: {page.start_address_hex}")
+                print(f"  • Dirección Fin:    {page.end_address_hex}")
+                print(f"  • Dirección Inic (Decimal): {page.start_address:,} bytes")
+                print(f"  • Dirección Fin  (Decimal): {page.end_address:,} bytes")
+                print("─" * 45 + "\n")
+
+            except PageOutOfBoundsException as e:
+                print(f"  [!] {e}")
+            except ValueError:
+                print("  [!] Error: Ingrese únicamente un valor entero.")
 
     def run(self) -> bool:
         print("==================================================")
@@ -50,7 +84,9 @@ class ConsoleInterface:
                     f"• Memoria Total:         {PaginationCalculator.bytes_to_legible(res.total_memory_bytes)} ({res.total_memory_bytes:,} bytes)")
                 print(f"• Anchura de Página:     {tamano_kb} KB ({res.page_size_bytes:,} bytes)")
                 print(f"• Total de Páginas:      {res.total_pages:,} páginas")
+
                 self.display_memory_map(res)
+                self.prompt_specific_page_query(res)
 
             elif opcion == "2":
                 bits_bus = int(input("► Ingrese Arquitectura del Bus (bits, ej: 16, 32, 64): "))
@@ -64,7 +100,9 @@ class ConsoleInterface:
                 print(f"• Memoria Total:         {PaginationCalculator.bytes_to_legible(res.total_memory_bytes)}")
                 print(f"• Cantidad de Páginas:   {res.total_pages:,}")
                 print(f"• Anchura Calculada:     {tamano_kb:.2f} KB ({res.page_size_bytes:,} bytes)")
+
                 self.display_memory_map(res)
+                self.prompt_specific_page_query(res)
 
             elif opcion == "3":
                 num_paginas = int(input("► Ingrese Cantidad Total de Páginas: "))
@@ -78,7 +116,9 @@ class ConsoleInterface:
                 print(f"• Memoria Requerida:     {PaginationCalculator.bytes_to_legible(res.total_memory_bytes)}")
                 print(
                     f"• Bus Mínimo Necesario:  {res.bus_bits} bits (capacidad hasta {PaginationCalculator.bytes_to_legible(2 ** res.bus_bits)})")
+
                 self.display_memory_map(res)
+                self.prompt_specific_page_query(res)
 
             elif opcion == "4":
                 return False

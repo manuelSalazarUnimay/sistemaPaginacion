@@ -1,5 +1,5 @@
 import math
-from domain.exceptions import InvalidInputException
+from domain.exceptions import InvalidInputException, PageOutOfBoundsException
 from domain.models import MemoryPage, MemoryMapResult
 
 
@@ -14,6 +14,21 @@ class PaginationCalculator:
         elif size_bytes >= 1024:
             return f"{size_bytes / 1024:.2f} KB"
         return f"{size_bytes} Bytes"
+
+    @staticmethod
+    def calculate_specific_page(page_number: int, total_pages: int, page_size_bytes: int) -> MemoryPage:
+        if page_number < 0 or page_number >= total_pages:
+            raise PageOutOfBoundsException(
+                f"La página {page_number} está fuera de rango. Debe estar entre 0 y {total_pages - 1}."
+            )
+
+        start_address = page_number * page_size_bytes
+        end_address = start_address + page_size_bytes - 1
+        return MemoryPage(
+            page_number=page_number,
+            start_address=start_address,
+            end_address=end_address
+        )
 
     @staticmethod
     def calculate_by_bus_and_page_size(bus_bits: int, page_size_kb: float) -> MemoryMapResult:
@@ -57,6 +72,7 @@ class PaginationCalculator:
 
         page_size_bytes = int(page_size_kb * 1024)
         required_memory = total_pages * page_size_bytes
+
         bus_bits = math.ceil(math.log2(required_memory)) if required_memory > 0 else 0
 
         pages_sample = PaginationCalculator._generate_sample_pages(total_pages, page_size_bytes)
@@ -73,7 +89,6 @@ class PaginationCalculator:
         limit = min(total_pages, sample_limit)
         sample = []
         for i in range(limit):
-            start = i * page_size_bytes
-            end = start + page_size_bytes - 1
-            sample.append(MemoryPage(page_number=i, start_address=start, end_address=end))
+            page = PaginationCalculator.calculate_specific_page(i, total_pages, page_size_bytes)
+            sample.append(page)
         return sample
