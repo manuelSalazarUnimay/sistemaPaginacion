@@ -40,10 +40,8 @@ def create_app() -> FastAPI:
     # Montar las subcarpetas estáticas para que el index.html pueda leer el CSS y JS
     app.mount("/css", StaticFiles(directory=os.path.join(web_dir, "css")), name="css")
     app.mount("/js", StaticFiles(directory=os.path.join(web_dir, "js")), name="js")
-
-    # Si tienes carpeta de assets o components, descomenta estas líneas:
-    # app.mount("/assets", StaticFiles(directory=os.path.join(web_dir, "assets")), name="assets")
-    # app.mount("/components", StaticFiles(directory=os.path.join(web_dir, "components")), name="components")
+    app.mount("/assets", StaticFiles(directory=os.path.join(web_dir, "assets")), name="assets")
+    app.mount("/components", StaticFiles(directory=os.path.join(web_dir, "components")), name="components")
 
     # 5. Servir el Frontend en la raíz
     @app.get("/", include_in_schema=False)
