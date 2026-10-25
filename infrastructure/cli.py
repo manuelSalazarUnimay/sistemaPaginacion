@@ -1,133 +1,105 @@
-import os
+import sys
 from application.pagination_service import PaginationService
-from domain.calculator import PaginationCalculator
-from domain.exceptions import DomainException, PageOutOfBoundsException
+from domain.exceptions import DomainException
 
 
-class ConsoleInterface:
-    def __init__(self):
-        self.service = PaginationService()
+class PaginationCLI:
+    """Console interface (CLI) for the Memory Pagination Simulator."""
 
-    def clear_screen(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
+    def __init__(self, service: PaginationService | None = None):
+        self.service = service or PaginationService()
 
-    def display_memory_map(self, result):
-        print("\n" + "=" * 50)
-        print("      MAPA DE MEMORIA (DIRECCIONES INICIO - FIN)      ")
-        print("=" * 50)
-
-        for page in result.pages_sample:
-            print(
-                f"Página {page.page_number:04d} | Inicio: {page.start_address_hex.ljust(10)} -> Fin: {page.end_address_hex}"
-            )
-
-        if result.total_pages > len(result.pages_sample):
-            remaining = result.total_pages - len(result.pages_sample)
-            print(f"\n... [{remaining:,} páginas adicionales no mostradas en la vista previa] ...")
-
-    def prompt_specific_page_query(self, result):
-        """Muestra el flujo interactivo de consulta solicitando los datos al servicio."""
-        print("\n" + "-" * 50)
-        print("          CONSULTA INTERACTIVA DE PÁGINAS          ")
-        print("-" * 50)
+    def run(self) -> None:
+        print("=" * 60)
+        print("    SIMULADOR DE PAGINACIÓN DE MEMORIA (DDD Architecture)")
+        print("=" * 60)
 
         while True:
-            opcion = input("► ¿Desea consultar la información de una página específica? (s/n): ").strip().lower()
+            print("\nSeleccione una opción:")
+            print("1. Calcular páginas desde Bus y Tamaño de Página")
+            print("2. Calcular tamaño de página desde Bus y Total de Páginas")
+            print("3. Calcular Bus desde Total de Páginas y Tamaño")
+            print("4. Análisis Didáctico Paso a Paso (Rango de Páginas)")
+            print("5. Salir")
 
-            if opcion not in ('s', 'si', 'sí', 'y'):
-                break
+            option = input("\nOpción > ").strip()
 
-            try:
-                num_pagina = int(input(f"► Ingrese el número de página (0 a {result.total_pages - 1}): "))
-
-                # Invocación directa al servicio (Dominio realiza los cálculos y validaciones)
-                page = self.service.get_page_detail(result, num_pagina)
-
-                print("\n" + "─" * 45)
-                print(f"  DETALLE DE LA PÁGINA #{page.page_number:,}")
-                print("─" * 45)
-                print(f"  • Número de Página: {page.page_number:,}")
-                print(f"  • Dirección Inicio: {page.start_address_hex}")
-                print(f"  • Dirección Fin:    {page.end_address_hex}")
-                print(f"  • Dirección Inic (Decimal): {page.start_address:,} bytes")
-                print(f"  • Dirección Fin  (Decimal): {page.end_address:,} bytes")
-                print("─" * 45 + "\n")
-
-            except PageOutOfBoundsException as e:
-                print(f"  [!] {e}")
-            except ValueError:
-                print("  [!] Error: Ingrese únicamente un valor entero.")
-
-    def run(self) -> bool:
-        print("==================================================")
-        print("   SIMULADOR EJECUTIVO DE PAGINACIÓN DE MEMORIA   ")
-        print("==================================================")
-        print("Seleccione la modalidad de cálculo:")
-        print("1. [Bus] + [Anchura Página]  --> Calcular Número de Páginas")
-        print("2. [Bus] + [Número Páginas]  --> Calcular Anchura de Página")
-        print("3. [Número Páginas] + [Anchura Página] --> Calcular Arquitectura del Bus")
-        print("4. Salir")
-
-        opcion = input("\nIngrese la opción deseada (1, 2, 3 o 4): ").strip()
-        print("-" * 50)
-
-        try:
-            if opcion == "1":
-                bits_bus = int(input("► Ingrese Arquitectura del Bus (bits, ej: 16, 32, 64): "))
-                tamano_kb = float(input("► Ingrese Anchura/Tamaño de Página en KB (ej: 4): "))
-
-                res = self.service.get_pages_from_bus_and_size(bits_bus, tamano_kb)
-
-                print("\n--- RESULTADO DE LA SIMULACIÓN ---")
-                print(f"• Arquitectura del Bus:  {res.bus_bits} bits")
-                print(
-                    f"• Memoria Total:         {PaginationCalculator.bytes_to_legible(res.total_memory_bytes)} ({res.total_memory_bytes:,} bytes)")
-                print(f"• Anchura de Página:     {tamano_kb} KB ({res.page_size_bytes:,} bytes)")
-                print(f"• Total de Páginas:      {res.total_pages:,} páginas")
-
-                self.display_memory_map(res)
-                self.prompt_specific_page_query(res)
-
-            elif opcion == "2":
-                bits_bus = int(input("► Ingrese Arquitectura del Bus (bits, ej: 16, 32, 64): "))
-                num_paginas = int(input("► Ingrese Cantidad Total de Páginas que desearías (ej: 16): "))
-
-                res = self.service.get_size_from_bus_and_pages(bits_bus, num_paginas)
-                tamano_kb = res.page_size_bytes / 1024
-
-                print("\n--- RESULTADO DE LA SIMULACIÓN (INVERSO) ---")
-                print(f"• Arquitectura del Bus:  {res.bus_bits} bits")
-                print(f"• Memoria Total:         {PaginationCalculator.bytes_to_legible(res.total_memory_bytes)}")
-                print(f"• Cantidad de Páginas:   {res.total_pages:,}")
-                print(f"• Anchura Calculada:     {tamano_kb:.2f} KB ({res.page_size_bytes:,} bytes)")
-
-                self.display_memory_map(res)
-                self.prompt_specific_page_query(res)
-
-            elif opcion == "3":
-                num_paginas = int(input("► Ingrese Cantidad Total de Páginas: "))
-                tamano_kb = float(input("► Ingrese Anchura/Tamaño de Página en KB: "))
-
-                res = self.service.get_bus_from_pages_and_size(num_paginas, tamano_kb)
-
-                print("\n--- RESULTADO DE LA SIMULACIÓN (INVERSO) ---")
-                print(f"• Cantidad de Páginas:   {res.total_pages:,}")
-                print(f"• Anchura de Página:     {tamano_kb} KB ({res.page_size_bytes:,} bytes)")
-                print(f"• Memoria Requerida:     {PaginationCalculator.bytes_to_legible(res.total_memory_bytes)}")
-                print(
-                    f"• Bus Mínimo Necesario:  {res.bus_bits} bits (capacidad hasta {PaginationCalculator.bytes_to_legible(2 ** res.bus_bits)})")
-
-                self.display_memory_map(res)
-                self.prompt_specific_page_query(res)
-
-            elif opcion == "4":
-                return False
+            if option == "1":
+                self._handle_pages_from_bus()
+            elif option == "2":
+                self._handle_size_from_bus()
+            elif option == "3":
+                self._handle_bus_from_pages()
+            elif option == "4":
+                self._handle_didactic_range()
+            elif option == "5":
+                print("¡Hasta luego!")
+                sys.exit(0)
             else:
-                print("Opción no válida. Intente nuevamente.")
+                print("Opción no válida. Intente de nuevo.")
+
+    def _handle_pages_from_bus(self) -> None:
+        try:
+            bus_bits = int(input("Ingrese los bits del bus (ej: 16, 32, 64): "))
+            page_size_kb = float(input("Ingrese el tamaño de página en KB (ej: 4.0): "))
+            result = self.service.get_pages_from_bus_and_size(bus_bits, page_size_kb)
+            print(f"\n[ÉXITO] Páginas totales soportadas: {result.end_page + 1:,}")
+            print(f"Bits Offset: {result.segmentation.offset_bits} | Bits VPN: {result.segmentation.vpn_bits}")
+        except DomainException as e:
+            print(f"\n[ERROR DE DOMINIO] {e}")
+        except ValueError:
+            print("\n[ERROR] Entrada de datos no válida.")
+
+    def _handle_size_from_bus(self) -> None:
+        try:
+            bus_bits = int(input("Ingrese los bits del bus: "))
+            total_pages = int(input("Ingrese la cantidad total de páginas: "))
+            result = self.service.get_size_from_bus_and_pages(bus_bits, total_pages)
+            print(f"\n[ÉXITO] Tamaño de página calculado: {result.segmentation.page_size_kb:.2f} KB ({result.segmentation.page_size_bytes} bytes)")
+        except DomainException as e:
+            print(f"\n[ERROR DE DOMINIO] {e}")
+        except ValueError:
+            print("\n[ERROR] Entrada de datos no válida.")
+
+    def _handle_bus_from_pages(self) -> None:
+        try:
+            total_pages = int(input("Ingrese la cantidad total de páginas: "))
+            page_size_kb = float(input("Ingrese el tamaño de página en KB: "))
+            result = self.service.get_bus_from_pages_and_size(total_pages, page_size_kb)
+            print(f"\n[ÉXITO] Bus mínimo requerido: {result.segmentation.bus_bits} bits")
+        except DomainException as e:
+            print(f"\n[ERROR DE DOMINIO] {e}")
+        except ValueError:
+            print("\n[ERROR] Entrada de datos no válida.")
+
+    def _handle_didactic_range(self) -> None:
+        try:
+            bus_bits = int(input("Ingrese los bits del bus (ej: 16): "))
+            page_size_kb = float(input("Ingrese el tamaño de página en KB (ej: 4.0): "))
+            start_page = int(input("Página inicial (ej: 0): "))
+            end_page = int(input("Página final (ej: 5): "))
+
+            result = self.service.get_didactic_page_range(bus_bits, page_size_kb, start_page, end_page)
+
+            print("\n" + "=" * 50)
+            print("          ANÁLISIS DIDÁCTICO PASO A PASO")
+            print("=" * 50)
+            for step in result.steps:
+                print(f"\nPaso {step.step_number}: {step.title}")
+                print(f"  Explicación: {step.explanation}")
+                print(f"  Fórmula:     {step.formula}")
+                print(f"  Resultado:   {step.result_summary}")
+
+            print("\n" + "-" * 50)
+            print(f"Rango Hexadecimal del Bloque: {result.start_address_hex} -> {result.end_address_hex}")
+            print("-" * 50)
 
         except DomainException as e:
             print(f"\n[ERROR DE DOMINIO] {e}")
         except ValueError:
-            print("\n[ERROR] Por favor, ingrese únicamente valores numéricos válidos.")
+            print("\n[ERROR] Entrada de datos no válida.")
 
-        return True
+
+if __name__ == "__main__":
+    cli = PaginationCLI()
+    cli.run()

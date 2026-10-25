@@ -1,0 +1,135 @@
+:root {
+    --brand-blue: #00497F;
+    --brand-yellow: #EFCB20;
+    --brand-yellow-hover: #d6b313;
+    --bg-card: #ffffff;
+    --text-primary: #1e293b;
+    --text-muted: #64748b;
+}
+
+.converter-container {
+    background-color: var(--bg-card);
+    border-top: 5px solid var(--brand-yellow);
+    width: 100%;
+}
+
+.btn-primary-action {
+    background-color: var(--brand-yellow);
+    color: #172554;
+    font-weight: 700;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.btn-primary-action:hover {
+    background-color: var(--brand-yellow-hover);
+}
+
+/* =========================================
+   Estilos personalizados para el Header
+   ========================================= */
+
+/* 1. Fondo degradado, padding (tamaño) y borde inferior */
+header {
+    background: linear-gradient(90deg, #dca80f 0%, #ffd947 50%, #dca80f 100%) !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    border-bottom: 5px solid #002b5e !important;
+}
+
+/* 2. Color azul oscuro y sombreado para el título principal */
+header h1 {
+    color: #002b5e !important;
+    font-size: 2.1rem !important;
+    text-shadow: 2px 2px 4px rgba(0, 43, 94, 0.4) !important;
+}
+
+/* 3. Ajustes y sombreado para el subtítulo */
+header span {
+    color: #004085 !important;
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    text-shadow: 1px 1px 3px rgba(0, 43, 94, 0.3) !important;
+}
+
+/* 4. Aumentar el tamaño del logo institucional a la derecha */
+header img {
+    height: 5.5rem !important;
+    max-height: none !important;
+}
+
+/* Opcional: Color de los íconos */
+header svg {
+    color: #002b5e !important;
+}
+
+/* =========================================
+   Estilos personalizados para el Sidebar (UI Suavizada)
+   ========================================= */
+
+/* 1. Fondo exterior gris azulado muy suave */
+aside {
+    background-color: #f0f4f8 !important;
+    border-right: none !important;
+    padding: 1.5rem !important;
+}
+
+/* 2. Tarjeta de navegación integrada y más redondeada */
+#sidebarNav {
+    background-color: #f8fafc !important; /* Blanco apagado para reducir el contraste */
+    border-radius: 1rem !important; /* Borde más redondeadito */
+    border: 1px solid rgba(0, 73, 127, 0.15) !important; /* Borde azul oscuro con baja opacidad */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important; /* Sombra muy tenue para que no flote tanto */
+    padding: 1rem !important;
+    height: auto !important;
+}
+
+/* 3. Centrar el título de los módulos y ajustar su contenedor */
+aside .p-6.border-b {
+    text-align: center !important;
+    border-color: transparent !important;
+    padding-bottom: 0.75rem !important;
+}
+
+/* =========================================
+   Interacciones de los Botones (Borde izquierdo amarillo, Activo azul)
+   ========================================= */
+
+/* 4. Estilos base (Inactivos: textos en gris, sin fondo) */
+.nav-btn {
+    background-color: transparent !important;
+    border: none !important; /* Quita cualquier otro borde */
+    border-left: 4px solid transparent !important; /* Reserva el espacio para el "bordecito" */
+    border-radius: 0.5rem !important;
+    color: #64748b !important; /* Textos en gris */
+    margin-bottom: 0.5rem !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.nav-btn div {
+    color: inherit !important;
+    transition: inherit !important;
+}
+
+/* 5. Efecto Hover: SOLO el bordecito izquierdo se vuelve amarillo */
+.nav-btn:hover {
+    background-color: transparent !important; /* Mantiene el fondo limpio */
+    border-left-color: var(--brand-yellow) !important; /* Pinta el bordecito de amarillo */
+    color: #334155 !important; /* Oscurece sutilmente el texto */
+}
+
+/* 6. ESTADO ACTIVO: Azul oscuro sólido con texto blanco */
+.nav-btn.bg-blue-50,
+.nav-btn.active {
+    background-color: var(--brand-blue) !important; /* Fondo azul */
+    border-left-color: var(--brand-blue) !important; /* El bordecito se camufla con el fondo azul */
+    color: #ffffff !important; /* Texto blanco */
+    box-shadow: 0 4px 6px rgba(0, 73, 127, 0.3) !important;
+}
+
+/* Mantener el estado activo intacto aunque se pase el cursor encima */
+.nav-btn.bg-blue-50:hover,
+.nav-btn.active:hover {
+    background-color: var(--brand-blue) !important;
+    border-left-color: var(--brand-blue) !important;
+    color: #ffffff !important;
+}
