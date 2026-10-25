@@ -1,0 +1,110 @@
+<div id="results-root" class="mt-8 hidden">
+    <div id="mainDashboard" class="space-y-8">
+        <!-- Tarjetas de Resumen -->
+        <div id="summaryCardsSection" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        </div>
+
+        <!-- Acordeón para el JSON -->
+        <details class="bg-gray-50 border border-gray-200 rounded-lg cursor-pointer shadow-sm">
+            <summary
+                    class="px-4 py-3 font-semibold text-gray-700 bg-gray-100 rounded-t-lg focus:outline-none flex justify-between items-center">
+                <span>Ver JSON de Respuesta (API)</span>
+                <span class="text-xs text-gray-400 font-normal">JSON Schema</span>
+            </summary>
+            <div class="p-4 bg-gray-900 text-green-400 font-mono text-xs overflow-x-auto rounded-b-lg">
+                <pre id="jsonResponseView">Esperando datos...</pre>
+            </div>
+        </details>
+
+        <!-- Tabla Original (Vista Rápida) -->
+        <div id="memoryMapSection" class="hidden bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-brandBlue text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg">Mapa de Memoria Simulado</h3>
+                <span id="memoryMapBadge" class="text-xs bg-white/20 px-2 py-1 rounded">pages_sample</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Página (VPN)</th>
+                        <th scope="col" class="px-6 py-3">Inicio (Hex)</th>
+                        <th scope="col" class="px-6 py-3">Fin (Hex)</th>
+                    </tr>
+                    </thead>
+                    <tbody id="memoryMapBody">
+                    <!-- Filas inyectadas por JS para la vista rápida -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Traza Pedagógica -->
+        <div id="didacticSection"
+             class="hidden bg-white p-6 rounded-lg shadow-sm border border-gray-200 border-l-4 border-brandBlue">
+            <h3 class="text-xl font-bold mb-4 text-brandBlue-dark">Traza Pedagógica del Análisis</h3>
+            <div id="didacticStepsContainer" class="space-y-4">
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Contenedor de pantalla completa: Desglose detallado -->
+    <div id="fullBreakdownView"
+         class="hidden fixed inset-0 w-full h-full min-h-screen bg-gray-50 z-[100] p-6 overflow-y-auto">
+
+        <!-- Encabezado y navegación -->
+        <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+            <div>
+                <h2 class="text-xl font-bold text-brandBlue">
+                    Desglose Procedimental
+                </h2>
+                <p class="text-sm text-gray-500">
+                    Estructura detallada de la memoria
+                </p>
+            </div>
+
+            <button id="btnBackToMain"
+                    type="button"
+                    class="px-4 py-2 border border-gray-300 rounded-md text-sm font-semibold hover:bg-gray-100 transition-colors">
+                &larr; Regresar al Simulador
+            </button>
+        </div>
+
+        <!-- Mapa completo de memoria -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+
+            <div class="bg-brandBlue text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg">
+                    Mapa de Memoria Simulado
+                </h3>
+
+                <span id="fullMemoryMapBadge"
+                      class="text-xs bg-white/20 px-2 py-1 rounded">
+                Desglose completo
+            </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 border-b">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Página (VPN)</th>
+                        <th scope="col" class="px-6 py-3">Inicio (Hex)</th>
+                        <th scope="col" class="px-6 py-3">Fin (Hex)</th>
+                    </tr>
+                    </thead>
+
+                    <!-- ID exclusivo de la tabla grande -->
+                    <tbody id="fullMemoryMapBody">
+                    <!-- Filas inyectadas por renderizarTablaMemoria() -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="fullMemoryMapEmpty"
+                 class="hidden px-6 py-8 text-center text-gray-500">
+                No hay datos de páginas disponibles para mostrar.
+            </div>
+        </div>
+    </div>
+</div>
