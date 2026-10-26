@@ -1,3 +1,4 @@
 Flask
 flasgger
 flask-cors
+uvicorn
