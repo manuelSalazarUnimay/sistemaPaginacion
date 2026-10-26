@@ -1,4 +1,2 @@
-Flask
-flasgger
-flask-cors
+fastapi
 uvicorn
