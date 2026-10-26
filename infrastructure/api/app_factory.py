@@ -1,26 +1,23 @@
 import os
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-# Actúa como tu @RestController
 from infrastructure.api.pagination_router import router as pagination_controller
 
 
 def create_app() -> FastAPI:
     """Patrón Factory para ensamblar la aplicación."""
 
-    # 1. Inicializar FastAPI (Swagger se auto-configura aquí y vivirá en /docs)
     app = FastAPI(
         title="Simulador de Paginación de Memoria API",
         description="API RESTful para la simulación de paginación bajo arquitectura DDD.",
         version="1.0.0",
-        docs_url="/docs",  # Ruta del Swagger auto-generado
+        docs_url="/docs",
         redoc_url="/redoc"
     )
 
-    # 2. Habilitar CORS (Equivalente a @CrossOrigin)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -29,24 +26,25 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # 3. Registrar Controladores (Inyectar el APIRouter)
-    # Todos los endpoints de este controlador tienen el prefijo /api/v1/pagination
     app.include_router(pagination_controller)
 
-    # 4. Configurar rutas para la carpeta 'web' (Frontend)
-    base_dir = os.path.dirname(os.path.dirname(__file__))
-    web_dir = os.path.join(base_dir, "web")
+    # 1. Obtener la raíz del proyecto desde la ubicación de este archivo (infrastructure/api/ -> raíz)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
+    web_dir = os.path.join(project_root, "web")
 
-    # Montar las subcarpetas estáticas para que el index.html pueda leer el CSS y JS
-    app.mount("/css", StaticFiles(directory=os.path.join(web_dir, "css")), name="css")
-    app.mount("/js", StaticFiles(directory=os.path.join(web_dir, "js")), name="js")
-    app.mount("/assets", StaticFiles(directory=os.path.join(web_dir, "assets")), name="assets")
-    app.mount("/components", StaticFiles(directory=os.path.join(web_dir, "components")), name="components")
+    # 2. Montar carpetas estáticas SOLO si existen en el despliegue
+    for folder in ["css", "js", "assets", "components"]:
+        folder_path = os.path.join(web_dir, folder)
+        if os.path.exists(folder_path):
+            app.mount(f"/{folder}", StaticFiles(directory=folder_path), name=folder)
 
-    # 5. Servir el Frontend en la raíz
+    # 3. Servir Frontend con validación de existencia
     @app.get("/", include_in_schema=False)
     def serve_ui():
-        """Sirve el archivo index.html cuando se entra a la raíz del sitio."""
-        return FileResponse(os.path.join(web_dir, "index.html"))
+        index_path = os.path.join(web_dir, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return JSONResponse({"message": "API activa. Visita /docs para ver la documentación."})
 
     return app
