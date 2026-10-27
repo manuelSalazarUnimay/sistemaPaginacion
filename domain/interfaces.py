@@ -1,12 +1,19 @@
 from abc import ABC, abstractmethod
-from domain.models import MemoryPage, SegmentationInfo, PageRangeAnalysis
+from domain.models import MemoryPage, SegmentationInfo, PageRangeAnalysis, PageSizeUnit
 
 
 class ISegmentationAnalyzer(ABC):
     """Contract for bus and page segmentation analysis."""
 
     @abstractmethod
-    def analyze(self, bus_bits: int, page_size_kb: float) -> SegmentationInfo:
+    def analyze(
+        self,
+        bus_bits: int,
+        page_size: float | None = None,
+        unit: PageSizeUnit | str = PageSizeUnit.KB,
+        *,
+        page_size_kb: float | None = None
+    ) -> SegmentationInfo:
         pass
 
 
@@ -19,12 +26,26 @@ class IPaginationCalculator(ABC):
 
     @abstractmethod
     def calculate_range_didactic(
-        self, bus_bits: int, page_size_kb: float, start_page: int, end_page: int
+        self,
+        bus_bits: int,
+        page_size: float | None = None,
+        start_page: int = 0,
+        end_page: int = 0,
+        unit: PageSizeUnit | str = PageSizeUnit.KB,
+        *,
+        page_size_kb: float | None = None
     ) -> PageRangeAnalysis:
         pass
 
     @abstractmethod
-    def calculate_by_bus_and_page_size(self, bus_bits: int, page_size_kb: float) -> PageRangeAnalysis:
+    def calculate_by_bus_and_page_size(
+        self,
+        bus_bits: int,
+        page_size: float | None = None,
+        unit: PageSizeUnit | str = PageSizeUnit.KB,
+        *,
+        page_size_kb: float | None = None
+    ) -> PageRangeAnalysis:
         pass
 
     @abstractmethod
@@ -32,5 +53,12 @@ class IPaginationCalculator(ABC):
         pass
 
     @abstractmethod
-    def calculate_by_pages_and_page_size(self, total_pages: int, page_size_kb: float) -> PageRangeAnalysis:
+    def calculate_by_pages_and_page_size(
+        self,
+        total_pages: int,
+        page_size: float | None = None,
+        unit: PageSizeUnit | str = PageSizeUnit.KB,
+        *,
+        page_size_kb: float | None = None
+    ) -> PageRangeAnalysis:
         pass
