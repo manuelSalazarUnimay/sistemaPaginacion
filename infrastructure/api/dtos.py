@@ -12,6 +12,8 @@ class MemoryPageDTO(BaseModel):
 
 class SegmentationInfoDTO(BaseModel):
     bus_bits: int = Field(..., description="Ancho de bus en bits")
+    page_size_val: float = Field(..., description="Valor base del tamaño de página")
+    page_size_unit: str = Field(..., description="Unidad de medida (B, KB, MB, GB)")
     page_size_bytes: int = Field(..., description="Tamaño de página en bytes")
     page_size_kb: float = Field(..., description="Tamaño de página en KB")
     offset_bits: int = Field(..., description="Bits asignados al desplazamiento (Offset)")
