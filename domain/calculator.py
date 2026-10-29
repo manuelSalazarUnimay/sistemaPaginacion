@@ -1,22 +1,72 @@
 import math
 from domain.interfaces import ISegmentationAnalyzer, IPaginationCalculator
 from domain.exceptions import InvalidInputException, PageOutOfBoundsException, ArchitectureOverflowException
-from domain.models import MemoryPage, SegmentationInfo, PageRangeAnalysis, DidacticStep
+from domain.models import MemoryPage, SegmentationInfo, PageRangeAnalysis, DidacticStep, PageSizeUnit
 
 
 class SegmentationAnalyzer(ISegmentationAnalyzer):
-    """Responsible for validating and analyzing memory segmentation physics."""
+    """Responsable de validar y analizar la física de segmentación de memoria."""
 
-    def analyze(self, bus_bits: int, page_size_kb: float) -> SegmentationInfo:
-        if bus_bits <= 0 or page_size_kb <= 0:
-            raise InvalidInputException("El ancho de bus y el tamaño de página deben ser mayores a cero.")
+    ALLOWED_BUS_BITS = (16, 32, 64)
 
-        page_size_bytes = int(page_size_kb * 1024)
+    @classmethod
+    def resolve_unit(cls, unit: PageSizeUnit | str) -> PageSizeUnit:
+        if isinstance(unit, PageSizeUnit):
+            return unit
+        if isinstance(unit, str):
+            try:
+                return PageSizeUnit(unit.upper())
+            except ValueError:
+                valid_units = ", ".join([u.value for u in PageSizeUnit])
+                raise InvalidInputException(
+                    f"Unidad de tamaño de página inválida ('{unit}'). Opciones válidas: {valid_units}"
+                )
+        raise InvalidInputException("La unidad debe ser de tipo PageSizeUnit o texto (str).")
+
+    def analyze(
+            self,
+            bus_bits: int,
+            page_size: float | None = None,
+            unit: PageSizeUnit | str = PageSizeUnit.KB,
+            *,
+            page_size_kb: float | None = None
+    ) -> SegmentationInfo:
+        # Compatibilidad hacia atrás para llamadas posicionales o con el argumento legacy page_size_kb
+        if page_size is None:
+            if page_size_kb is not None:
+                page_size = page_size_kb
+                unit = PageSizeUnit.KB
+            else:
+                raise InvalidInputException("Debe especificar el tamaño de la página.")
+
+        # 1. Validación de arquitectura de bus
+        if bus_bits not in self.ALLOWED_BUS_BITS:
+            valid_buses = ", ".join(map(str, self.ALLOWED_BUS_BITS))
+            raise InvalidInputException(
+                f"Arquitectura de bus no permitida ({bus_bits} bits). "
+                f"Las arquitecturas soportadas son: {valid_buses} bits."
+            )
+
+        # 2. Resolución de unidad
+        resolved_unit = self.resolve_unit(unit)
+
+        # 3. Validación del valor recibido
+        if not math.isfinite(page_size) or page_size <= 0:
+            raise InvalidInputException(
+                "El tamaño de página debe ser un número finito mayor a cero."
+            )
+
+        page_size_bytes = int(page_size * resolved_unit.bytes_multiplier)
+
+        # 4. Verificación de potencia de 2
+        if page_size_bytes < 1:
+            raise InvalidInputException("El tamaño de página debe ser de al menos 1 byte.")
 
         offset_bits_float = math.log2(page_size_bytes)
         if not offset_bits_float.is_integer():
             raise InvalidInputException(
-                f"El tamaño de página ({page_size_bytes} bytes) debe ser una potencia exacta de 2."
+                f"El tamaño de página ({page_size} {resolved_unit.value} = {page_size_bytes} bytes) "
+                f"debe ser una potencia exacta de 2."
             )
 
         offset_bits = int(offset_bits_float)
@@ -24,7 +74,7 @@ class SegmentationAnalyzer(ISegmentationAnalyzer):
 
         if vpn_bits <= 0:
             raise InvalidInputException(
-                f"El tamaño de página ({page_size_kb} KB = 2^{offset_bits} bytes) "
+                f"El tamaño de página ({page_size} {resolved_unit.value} = 2^{offset_bits} bytes) "
                 f"es igual o mayor al espacio de direccionamiento total (2^{bus_bits} bytes)."
             )
 
@@ -33,8 +83,9 @@ class SegmentationAnalyzer(ISegmentationAnalyzer):
 
         return SegmentationInfo(
             bus_bits=bus_bits,
+            page_size_val=page_size,
+            page_size_unit=resolved_unit,
             page_size_bytes=page_size_bytes,
-            page_size_kb=page_size_kb,
             offset_bits=offset_bits,
             vpn_bits=vpn_bits,
             max_supported_pages=max_supported_pages,
@@ -43,17 +94,17 @@ class SegmentationAnalyzer(ISegmentationAnalyzer):
 
 
 class DidacticStepBuilder:
-    """Responsible for constructing pedagogical explanation steps."""
+    """Construcción de los pasos didácticos explicativos."""
 
     @staticmethod
     def build_steps(
-        seg: SegmentationInfo,
-        start_page: int,
-        end_page: int,
-        start_addr_dec: int,
-        start_addr_hex: str,
-        end_addr_dec: int,
-        end_addr_hex: str
+            seg: SegmentationInfo,
+            start_page: int,
+            end_page: int,
+            start_addr_dec: int,
+            start_addr_hex: str,
+            end_addr_dec: int,
+            end_addr_hex: str
     ) -> list[DidacticStep]:
         return [
             DidacticStep(
@@ -61,7 +112,7 @@ class DidacticStepBuilder:
                 title="Segmentación de Datos y Registro de Dirección",
                 explanation=(
                     f"Se analiza un bus de {seg.bus_bits} bits. "
-                    f"El tamaño de página es {seg.page_size_kb} KB ({seg.page_size_bytes} bytes)."
+                    f"El tamaño de página es {seg.page_size_val} {seg.page_size_unit.value} ({seg.page_size_bytes} bytes)."
                 ),
                 formula=(
                     f"Bits Offset = log2({seg.page_size_bytes}) = {seg.offset_bits} | "
@@ -97,7 +148,7 @@ class DidacticStepBuilder:
 
 
 class PaginationCalculator(IPaginationCalculator):
-    """Main pagination calculation engine implementing IPaginationCalculator."""
+    """Motor principal de cálculo de paginación."""
 
     def __init__(self, segmentation_analyzer: ISegmentationAnalyzer | None = None):
         self._segmentation_analyzer = segmentation_analyzer or SegmentationAnalyzer()
@@ -130,12 +181,24 @@ class PaginationCalculator(IPaginationCalculator):
         )
 
     def calculate_range_didactic(
-        self, bus_bits: int, page_size_kb: float, start_page: int, end_page: int
+            self,
+            bus_bits: int,
+            page_size: float | None = None,
+            start_page: int = 0,
+            end_page: int = 0,
+            unit: PageSizeUnit | str = PageSizeUnit.KB,
+            *,
+            page_size_kb: float | None = None
     ) -> PageRangeAnalysis:
         if start_page < 0 or end_page < start_page:
             raise InvalidInputException("El rango de páginas especificado es inválido.")
 
-        seg = self._segmentation_analyzer.analyze(bus_bits, page_size_kb)
+        seg = self._segmentation_analyzer.analyze(
+            bus_bits=bus_bits,
+            page_size=page_size,
+            unit=unit,
+            page_size_kb=page_size_kb
+        )
 
         if end_page >= seg.max_supported_pages:
             page_bits_needed = end_page.bit_length()
@@ -153,6 +216,7 @@ class PaginationCalculator(IPaginationCalculator):
 
         hex_padding = math.ceil(seg.bus_bits / 4)
         start_addr_dec = start_page * seg.page_size_bytes
+
         start_addr_hex = f"0x{start_addr_dec:0{hex_padding}X}"
         end_addr_dec = (end_page + 1) * seg.page_size_bytes - 1
         end_addr_hex = f"0x{end_addr_dec:0{hex_padding}X}"
@@ -172,7 +236,7 @@ class PaginationCalculator(IPaginationCalculator):
         )
 
     def _generate_sample_pages(
-        self, start_page: int, end_page: int, total_pages: int, page_size_bytes: int, sample_limit: int = 16
+            self, start_page: int, end_page: int, total_pages: int, page_size_bytes: int, sample_limit: int = 16
     ) -> list[MemoryPage]:
         sample = []
         limit = min(end_page + 1, start_page + sample_limit)
@@ -182,33 +246,100 @@ class PaginationCalculator(IPaginationCalculator):
             sample.append(self.calculate_specific_page(end_page, total_pages, page_size_bytes))
         return sample
 
-    def calculate_by_bus_and_page_size(self, bus_bits: int, page_size_kb: float) -> PageRangeAnalysis:
-        seg = self._segmentation_analyzer.analyze(bus_bits, page_size_kb)
+    def calculate_by_bus_and_page_size(
+            self,
+            bus_bits: int,
+            page_size: float | None = None,
+            unit: PageSizeUnit | str = PageSizeUnit.KB,
+            *,
+            page_size_kb: float | None = None
+    ) -> PageRangeAnalysis:
+        seg = self._segmentation_analyzer.analyze(
+            bus_bits=bus_bits,
+            page_size=page_size,
+            unit=unit,
+            page_size_kb=page_size_kb
+        )
         end_page = seg.max_supported_pages - 1
         pages_sample = self._generate_sample_pages(0, end_page, seg.max_supported_pages, seg.page_size_bytes)
         return PageRangeAnalysis(start_page=0, end_page=end_page, segmentation=seg, pages_sample=pages_sample)
 
     def calculate_by_bus_and_total_pages(self, bus_bits: int, total_pages: int) -> PageRangeAnalysis:
-        if bus_bits <= 0 or total_pages <= 0:
-            raise InvalidInputException("Los valores deben ser mayores a cero.")
+        if bus_bits not in SegmentationAnalyzer.ALLOWED_BUS_BITS:
+            valid_buses = ", ".join(map(str, SegmentationAnalyzer.ALLOWED_BUS_BITS))
+            raise InvalidInputException(
+                f"Arquitectura de bus no permitida ({bus_bits} bits). "
+                f"Las arquitecturas soportadas son: {valid_buses} bits."
+            )
+        if not isinstance(total_pages, int) or isinstance(total_pages, bool) or total_pages <= 0:
+            raise InvalidInputException("El número total de páginas debe ser un entero mayor a cero.")
+        if total_pages & (total_pages - 1):
+            raise InvalidInputException(
+                "El número total de páginas debe ser una potencia de 2 para obtener "
+                "un tamaño de página compatible con el direccionamiento binario."
+            )
+        if total_pages > 2 ** bus_bits:
+            raise InvalidInputException(
+                "El número total de páginas no puede superar el espacio de direcciones."
+            )
 
         total_memory = 2 ** bus_bits
         page_size_bytes = total_memory // total_pages
-        page_size_kb = page_size_bytes / 1024.0
 
-        seg = self._segmentation_analyzer.analyze(bus_bits, page_size_kb)
+        seg = self._segmentation_analyzer.analyze(
+            bus_bits=bus_bits,
+            page_size=page_size_bytes,
+            unit=PageSizeUnit.BYTES
+        )
         pages_sample = self._generate_sample_pages(0, total_pages - 1, total_pages, page_size_bytes)
         return PageRangeAnalysis(start_page=0, end_page=total_pages - 1, segmentation=seg, pages_sample=pages_sample)
 
-    def calculate_by_pages_and_page_size(self, total_pages: int, page_size_kb: float) -> PageRangeAnalysis:
-        if total_pages <= 0 or page_size_kb <= 0:
-            raise InvalidInputException("Los valores deben ser mayores a cero.")
+    def calculate_by_pages_and_page_size(
+            self,
+            total_pages: int,
+            page_size: float | None = None,
+            unit: PageSizeUnit | str = PageSizeUnit.KB,
+            *,
+            page_size_kb: float | None = None
+    ) -> PageRangeAnalysis:
+        if total_pages <= 0:
+            raise InvalidInputException("El número total de páginas debe ser mayor a cero.")
 
-        page_size_bytes = int(page_size_kb * 1024)
+        resolved_page_size = page_size if page_size is not None else page_size_kb
+        if (
+            resolved_page_size is None
+            or not math.isfinite(resolved_page_size)
+            or resolved_page_size <= 0
+        ):
+            raise InvalidInputException(
+                "El tamaño de página debe ser un número finito mayor a cero."
+            )
+
+        resolved_unit = SegmentationAnalyzer.resolve_unit(unit)
+        page_size_bytes = int(resolved_page_size * resolved_unit.bytes_multiplier)
+        if page_size_bytes < 1:
+            raise InvalidInputException("El tamaño de página debe ser de al menos 1 byte.")
         required_memory = total_pages * page_size_bytes
 
-        bus_bits = math.ceil(math.log2(required_memory)) if required_memory > 0 else 0
+        bits_needed = math.ceil(math.log2(required_memory)) if required_memory > 0 else 1
 
-        seg = self._segmentation_analyzer.analyze(bus_bits, page_size_kb)
-        pages_sample = self._generate_sample_pages(0, total_pages - 1, total_pages, page_size_bytes)
+        allowed_buses = sorted(SegmentationAnalyzer.ALLOWED_BUS_BITS)
+        bus_bits = next((b for b in allowed_buses if b >= bits_needed), None)
+
+        if bus_bits is None:
+            max_bus = max(allowed_buses)
+            raise ArchitectureOverflowException(
+                message=f"La memoria requerida excede la arquitectura de bus máxima soportada ({max_bus} bits).",
+                required_bits=bits_needed,
+                bus_bits=max_bus,
+                max_page=total_pages - 1,
+                requested_page=total_pages - 1
+            )
+
+        seg = self._segmentation_analyzer.analyze(
+            bus_bits=bus_bits,
+            page_size=resolved_page_size,
+            unit=resolved_unit
+        )
+        pages_sample = self._generate_sample_pages(0, total_pages - 1, seg.max_supported_pages, page_size_bytes)
         return PageRangeAnalysis(start_page=0, end_page=total_pages - 1, segmentation=seg, pages_sample=pages_sample)

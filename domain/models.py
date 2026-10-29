@@ -1,9 +1,28 @@
+from enum import Enum
 from dataclasses import dataclass, field
+
+
+class PageSizeUnit(str, Enum):
+    """Unidades de medida soportadas para el tamaño de página."""
+    BYTES = "B"
+    KB = "KB"
+    MB = "MB"
+    GB = "GB"
+
+    @property
+    def bytes_multiplier(self) -> int:
+        multipliers = {
+            PageSizeUnit.BYTES: 1,
+            PageSizeUnit.KB: 1024,
+            PageSizeUnit.MB: 1024 ** 2,
+            PageSizeUnit.GB: 1024 ** 3,
+        }
+        return multipliers[self]
 
 
 @dataclass(frozen=True)
 class MemoryPage:
-    """Representation of an individual memory page and its address ranges."""
+    """Representación de una página individual de memoria y sus rangos de dirección."""
     page_number: int
     start_address: int
     end_address: int
@@ -19,7 +38,7 @@ class MemoryPage:
 
 @dataclass(frozen=True)
 class DidacticStep:
-    """Represents a single step in the explanatory didactic trace."""
+    """Representa un paso dentro de la traza explicativa didáctica."""
     step_number: int
     title: str
     explanation: str
@@ -29,19 +48,25 @@ class DidacticStep:
 
 @dataclass(frozen=True)
 class SegmentationInfo:
-    """Architectural segmentation metadata for the memory bus."""
+    """Metadatos arquitectónicos de segmentación de la memoria."""
     bus_bits: int
+    page_size_val: float
+    page_size_unit: PageSizeUnit
     page_size_bytes: int
-    page_size_kb: float
     offset_bits: int
     vpn_bits: int
     max_supported_pages: int
     total_memory_bytes: int
 
+    @property
+    def page_size_kb(self) -> float:
+        """Propiedad de compatibilidad hacia atrás."""
+        return self.page_size_bytes / 1024.0
+
 
 @dataclass
 class PageRangeAnalysis:
-    """Complete result of a page range calculation with didactic trace."""
+    """Resultado completo del análisis de rango de páginas con traza didáctica."""
     start_page: int
     end_page: int
     segmentation: SegmentationInfo
@@ -69,5 +94,4 @@ class PageRangeAnalysis:
         return hex(self.end_address_dec).upper()
 
 
-# Alias for backward compatibility
 MemoryMapResult = PageRangeAnalysis
