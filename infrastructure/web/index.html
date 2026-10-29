@@ -1,25 +1,1109 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Paginación de Memoria</title>
-    <!-- Tailwind CSS por CDN -->
+    <title>Simulador de Paginación de Memoria - Colegio Mayor del Cauca</title>
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="js/tailwindConfig.js"></script>
-    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brandYellow: '#F5BE0B',
+                        'brandYellow-dark': '#D9A107',
+                        brandBlue: '#003B63',
+                        'brandBlue-dark': '#002A47',
+                        'brandBlue-light': '#0B4D7B',
+                        institutional: {
+                            gold: '#F5BE0B',
+                            goldDark: '#D9A107',
+                            navy: '#003B63',
+                            navyDark: '#002A47',
+                            navyLight: '#0B4D7B',
+                            bg: '#F3F4F6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @keyframes memoryPulse {
+
+            0%,
+            100% {
+                border-color: #F5BE0B;
+                box-shadow: 0 0 10px rgba(245, 190, 11, 0.4);
+            }
+
+            50% {
+                border-color: #D9A107;
+                box-shadow: 0 0 20px rgba(245, 190, 11, 0.8);
+            }
+        }
+
+        .pulse-selected {
+            animation: memoryPulse 1.8s ease-in-out infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.4);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.6);
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-slate-800 flex flex-col min-h-screen">
-<div id="header-root"></div>
-<div class="flex flex-1 overflow-hidden">
-    <div id="sidebar-root" class="w-64 hidden md:block border-r bg-white"></div>
-    <main class="flex-1 overflow-y-auto p-4 md:p-8">
-        <div id="form-root"></div>
-        <div id="results-root" class="mt-8 hidden"></div>
-    </main>
-</div>
-<script src="js/loader.js"></script>
-<script src="js/api.js"></script>
-<script src="js/main.js"></script>
+
+<body
+    class="bg-gray-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 font-sans transition-colors duration-300 min-h-full flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- COMPONENTE 1: HEADER -->
+    <header
+        class="bg-brandYellow text-brandBlue-dark shadow-md flex items-center justify-between px-6 py-4 sticky top-0 z-40">
+        <div class="flex items-center gap-4">
+            <!-- Menú hamburguesa para móvil -->
+            <button id="mobileMenuBtn"
+                class="md:hidden text-brandBlue-dark focus:outline-none hover:opacity-75 transition-opacity">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+            <div class="flex flex-col">
+                <h1 class="text-xl sm:text-2xl font-bold tracking-wide flex items-center gap-2">
+                    <i data-lucide="cpu" class="w-6 h-6 text-brandBlue-dark"></i>
+                    Simulador de Paginación
+                </h1>
+                <span class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-brandBlue">Paginación de
+                    Memoria</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <!-- Switch Modo Oscuro -->
+            <button id="themeToggleBtn" onclick="toggleTheme()"
+                class="p-2 rounded-lg bg-white/40 dark:bg-slate-800/60 hover:bg-white/60 transition shadow-sm text-brandBlue-dark dark:text-amber-400"
+                title="Cambiar Tema">
+                <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+            </button>
+
+            <!-- Logo Institucional a la derecha -->
+            <div class="hidden sm:flex items-center">
+                <img src="assets/logo-institucion2.png" alt="Logo Institución" class="h-10 object-contain"
+                    onerror="this.style.display='none'">
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL CON SIDEBAR Y CONTENIDO -->
+    <div class="flex flex-1 flex-col md:flex-row relative">
+
+        <!-- COMPONENTE 4: SIDEBAR -->
+        <aside id="sidebar"
+            class="h-auto md:h-auto flex flex-col bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 w-full md:w-64 flex-shrink-0 transition-all duration-300">
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto" id="sidebarNav">
+                <div class="p-4 border-b border-gray-100 dark:border-slate-800">
+                    <h2 class="text-xs font-extrabold text-gray-400 dark:text-slate-500 uppercase tracking-widest">
+                        Módulos de Cálculo</h2>
+                </div>
+                <!-- Opción 1: Calcular Páginas -->
+                <button
+                    class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 dark:text-slate-300 font-medium transition-all hover:bg-gray-50 dark:hover:bg-slate-800 border-l-4 border-transparent hover:border-brandYellow text-brandBlue font-bold bg-amber-50/50 dark:bg-slate-800/50"
+                    data-mode="pages-from-bus">
+                    <div class="text-xs font-bold opacity-70 uppercase">Opción 1</div>
+                    <div class="text-sm font-semibold">Calcular Páginas</div>
+                </button>
+
+                <!-- Opción 2: Calcular Anchura -->
+                <button
+                    class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 dark:text-slate-300 font-medium transition-all hover:bg-gray-50 dark:hover:bg-slate-800 border-l-4 border-transparent hover:border-gray-300"
+                    data-mode="size-from-bus">
+                    <div class="text-xs font-bold opacity-70 uppercase">Opción 2</div>
+                    <div class="text-sm font-semibold">Calcular Anchura</div>
+                </button>
+
+                <!-- Opción 3: Calcular Bus -->
+                <button
+                    class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 dark:text-slate-300 font-medium transition-all hover:bg-gray-50 dark:hover:bg-slate-800 border-l-4 border-transparent hover:border-gray-300"
+                    data-mode="bus-from-pages">
+                    <div class="text-xs font-bold opacity-70 uppercase">Opción 3</div>
+                    <div class="text-sm font-semibold">Calcular Bus</div>
+                </button>
+
+                <!-- Opción 4: Análisis Didáctico -->
+                <button
+                    class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 dark:text-slate-300 font-medium transition-all hover:bg-gray-50 dark:hover:bg-slate-800 border-l-4 border-transparent hover:border-gray-300"
+                    data-mode="range-didactic">
+                    <div class="text-xs font-bold opacity-70 uppercase">Opción 4</div>
+                    <div class="text-sm font-semibold">Análisis Didáctico</div>
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-gray-100 dark:border-slate-800 text-center">
+                <span class="text-xs text-gray-400 dark:text-slate-500 font-medium">Versión 1.0.0</span>
+            </div>
+        </aside>
+
+        <!-- MAIN AREA -->
+        <main class="flex-1 p-4 md:p-6 space-y-6 overflow-x-hidden">
+
+            <!-- COMPONENTE 2: FORMULARIO Y RESULTADO INMEDIATO -->
+            <div class="flex flex-col xl:flex-row gap-6">
+                <!-- Contenedor del Formulario -->
+                <div
+                    class="converter-container bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6 flex-1 relative">
+                    <div class="flex items-center gap-2 mb-6">
+                        <svg class="w-6 h-6 text-brandYellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                            </path>
+                        </svg>
+                        <h2 id="formTitle" class="text-xl font-bold text-brandBlue dark:text-white">Calcular Páginas
+                        </h2>
+                    </div>
+
+                    <form id="calcForm" class="space-y-4" onsubmit="main(event)">
+                        <input type="hidden" id="currentMode" value="pages-from-bus">
+
+                        <!-- Fila 1 de inputs -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            <!-- Grupo Bus -->
+                            <div class="input-group bus-group">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Bits del
+                                    Bus</label>
+                                <select id="busBits"
+                                    class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white rounded-md p-3 focus:ring-brandBlue focus:border-brandBlue font-semibold text-sm transition-colors">
+                                    <option value="8">8 bits</option>
+                                    <option value="12">12 bits</option>
+                                    <option value="16" selected>16 bits</option>
+                                    <option value="32">32 bits</option>
+                                    <option value="64">64 bits</option>
+                                </select>
+                            </div>
+
+                            <!-- Grupo Tamaño con Selector de Unidad -->
+                            <div class="input-group size-group">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Tamaño de
+                                    Página</label>
+                                <div class="flex gap-2 mt-1">
+                                    <input type="number" step="any" id="pageSizeValue" min="0.1" value="4"
+                                        class="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 focus:ring-brandBlue focus:border-brandBlue font-mono"
+                                        placeholder="Ej: 4" oninput="updatePowerPreview()">
+
+                                    <!-- Selector de unidades agregadas (B, KB, MB, GB) -->
+                                    <select id="pageSizeUnit" onchange="updatePowerPreview()"
+                                        class="border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white rounded-md px-3 font-semibold text-sm focus:ring-brandBlue focus:border-brandBlue">
+                                        <option value="B">Bytes</option>
+                                        <option value="KB" selected>KB</option>
+                                        <option value="MB">MB</option>
+                                        <option value="GB">GB</option>
+                                    </select>
+                                </div>
+                                <!-- Input oculto para mantener compatibilidad con referencias anteriores id="pageSizeKb" -->
+                                <input type="hidden" id="pageSizeKb" value="4">
+                            </div>
+
+                            <!-- Grupo Cantidad de Páginas -->
+                            <div class="input-group pages-group hidden">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Total de
+                                    Páginas</label>
+                                <input type="number" id="totalPages" min="1" value="16"
+                                    class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 focus:ring-brandBlue focus:border-brandBlue font-mono"
+                                    placeholder="Ej: 1024" oninput="updatePowerPreview()">
+                            </div>
+                        </div>
+
+                        <!-- Previsualización Didáctica de Potencias -->
+                        <div id="powerPreviewContainer"
+                            class="hidden p-4 bg-amber-50/60 dark:bg-slate-800/60 border border-amber-200 dark:border-slate-700 rounded-md my-4 flex justify-center gap-3 flex-wrap text-xs font-mono">
+                            <!-- Llenado dinámicamente -->
+                        </div>
+
+                        <!-- Fila 2 de inputs -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div class="input-group optional-group">
+                                <label class="block text-sm font-medium text-gray-500 dark:text-slate-400">Página
+                                    Específica (Opcional)</label>
+                                <input type="number" id="requestedPage" min="0" value="10"
+                                    class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 font-mono"
+                                    placeholder="Ej: 10">
+                            </div>
+
+                            <div class="input-group range-group hidden">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Página
+                                    Inicial</label>
+                                <input type="number" id="startPage" min="0"
+                                    class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 font-mono"
+                                    value="0">
+                            </div>
+                            <div class="input-group range-group hidden">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Página
+                                    Final</label>
+                                <input type="number" id="endPage" min="0"
+                                    class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 font-mono"
+                                    value="10">
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <button type="submit"
+                                class="btn-primary-action w-full py-3 rounded-md shadow-md text-lg flex items-center justify-center gap-2 bg-brandYellow hover:bg-brandYellow-dark text-brandBlue-dark font-bold transition-all">
+                                Ejecutar Simulación
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Contenedor de Errores Traducidos -->
+                    <div id="errorContainer"
+                        class="hidden mt-4 p-4 bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 rounded-md border border-red-200 dark:border-red-900 text-sm space-y-1">
+                    </div>
+                </div>
+
+                <!-- Panel de Resultado Inmediato -->
+                <div class="xl:w-1/3 flex flex-col">
+                    <div
+                        class="quick-result-card rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 flex flex-col h-full items-center justify-between relative min-h-[320px] shadow-sm">
+                        <span
+                            class="text-xs font-bold text-brandBlue dark:text-brandYellow uppercase tracking-widest mb-4">Resultado
+                            Inmediato</span>
+
+                        <!-- Contenido Inmediato Dinámico -->
+                        <div id="quickResultContent" class="text-center w-full my-auto space-y-3">
+                            <div class="text-4xl text-brandBlue dark:text-slate-600 opacity-30 font-bold mb-4">---</div>
+                            <p class="text-sm text-gray-400">Esperando simulación...</p>
+                        </div>
+
+                        <!-- Botón de Desglose -->
+                        <button id="btnShowDetails" type="button" onclick="openFullBreakdownView()"
+                            class="mt-4 w-full py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-brandBlue dark:text-brandYellow font-semibold text-sm rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors hidden flex items-center justify-center gap-2">
+                            Desglose de este resultado
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BIT INSPECTOR DIDÁCTICO INTEGRADOR -->
+            <div id="bitInspectorSection"
+                class="hidden bg-white dark:bg-slate-900 rounded-lg p-6 border border-gray-200 dark:border-slate-800 shadow-sm space-y-4">
+                <div
+                    class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b pb-3 border-gray-100 dark:border-slate-800">
+                    <div>
+                        <h3 class="text-lg font-bold text-brandBlue dark:text-white flex items-center gap-2">
+                            <i data-lucide="binary" class="w-5 h-5 text-brandYellow"></i>
+                            Inspector Binario & Desglose de Bits
+                        </h3>
+                        <p class="text-xs text-gray-500 dark:text-slate-400">Representación lógica de la dirección de
+                            memoria virtual seleccionada.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="inspectorAddressInput" value="0x0000"
+                            oninput="onInspectorInputChange(this.value)"
+                            class="px-3 py-1.5 text-xs font-mono font-bold rounded border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-900 dark:text-white w-32 focus:outline-none"
+                            placeholder="Ej: 0x00A0 o P5">
+                    </div>
+                </div>
+
+                <!-- Cajas de bits -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs font-bold font-mono">
+                        <span class="text-brandBlue dark:text-blue-300 flex items-center gap-1">
+                            <span class="w-3 h-3 rounded-full bg-brandBlue inline-block"></span>
+                            VPN (Página): <span id="inspectorVpnBitsLabel">4 bits</span>
+                        </span>
+                        <span class="text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                            Offset (Desplazamiento): <span id="inspectorOffsetBitsLabel">12 bits</span>
+                            <span class="w-3 h-3 rounded-full bg-brandYellow inline-block"></span>
+                        </span>
+                    </div>
+
+                    <div class="overflow-x-auto pb-2">
+                        <div class="min-w-[480px]">
+                            <div id="bitIndicesRow"
+                                class="grid gap-1 mb-1 text-center font-mono text-[10px] text-gray-400 font-bold select-none">
+                            </div>
+                            <div id="bitBoxesRow" class="grid gap-1 font-mono text-xs sm:text-sm font-bold text-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPONENTE 3: RESULTADOS (PANEL SUPERIOR Y TABLAS) -->
+            <div id="results-root" class="mt-8 hidden space-y-8">
+                <div id="mainDashboard" class="space-y-8">
+                    <!-- Tarjetas de Resumen -->
+                    <div id="summaryCardsSection" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Inyectadas por JS -->
+                    </div>
+
+                    <!-- Acordeón para el JSON -->
+                    <details
+                        class="bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg cursor-pointer shadow-sm">
+                        <summary
+                            class="px-4 py-3 font-semibold text-gray-700 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 rounded-t-lg focus:outline-none flex justify-between items-center text-sm">
+                            <span>Ver JSON de Respuesta (API)</span>
+                            <span class="text-xs text-gray-400 font-mono">JSON Schema</span>
+                        </summary>
+                        <div class="p-4 bg-gray-900 text-green-400 font-mono text-xs overflow-x-auto rounded-b-lg">
+                            <pre id="jsonResponseView">Esperando datos...</pre>
+                        </div>
+                    </details>
+
+                    <!-- Tabla Original (Vista Rápida) -->
+                    <div id="memoryMapSection"
+                        class="hidden bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+                        <div class="bg-brandBlue text-white px-6 py-4 flex justify-between items-center">
+                            <h3 class="font-bold text-lg">Mapa de Memoria Simulado</h3>
+                            <span id="memoryMapBadge"
+                                class="text-xs bg-white/20 px-2.5 py-1 rounded font-mono font-semibold">pages_sample</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                                <thead
+                                    class="text-xs text-gray-700 dark:text-slate-200 uppercase bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-800">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Página (VPN)</th>
+                                        <th scope="col" class="px-6 py-3">Inicio (Hex)</th>
+                                        <th scope="col" class="px-6 py-3">Fin (Hex)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="memoryMapBody"
+                                    class="font-mono text-xs divide-y divide-gray-100 dark:divide-slate-800">
+                                    <!-- Filas inyectadas por JS para la vista rápida -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Traza Pedagógica -->
+                    <div id="didacticSection"
+                        class="hidden bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 border-l-4 border-brandBlue">
+                        <h3 class="text-xl font-bold mb-4 text-brandBlue-dark dark:text-brandYellow">Traza Pedagógica
+                            del Análisis</h3>
+                        <div id="didacticStepsContainer" class="space-y-4">
+                            <!-- Inyectado por JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenedor de pantalla completa: Desglose detallado -->
+                <div id="fullBreakdownView"
+                    class="hidden fixed inset-0 w-full h-full min-h-screen bg-gray-50 dark:bg-slate-950 z-[100] p-4 sm:p-6 overflow-y-auto">
+
+                    <!-- Encabezado y navegación -->
+                    <div
+                        class="flex justify-between items-center mb-6 bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-xl font-bold text-brandBlue dark:text-white">
+                                Desglose Procedimental
+                            </h2>
+                            <p class="text-sm text-gray-500 dark:text-slate-400">
+                                Estructura detallada de la memoria física y virtual
+                            </p>
+                        </div>
+
+                        <button id="btnBackToMain" type="button" onclick="closeFullBreakdownView()"
+                            class="px-4 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-md text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors text-slate-800 dark:text-white">
+                            &larr; Regresar al Simulador
+                        </button>
+                    </div>
+
+                    <!-- Mapa completo de memoria -->
+                    <div
+                        class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+
+                        <div class="bg-brandBlue text-white px-6 py-4 flex justify-between items-center">
+                            <h3 class="font-bold text-lg">
+                                Mapa de Memoria (Datos devueltos por la API)
+                            </h3>
+
+                            <span id="fullMemoryMapBadge" class="text-xs bg-white/20 px-2 py-1 rounded font-mono">
+                                Desglose completo
+                            </span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                                <thead
+                                    class="text-xs text-gray-700 dark:text-slate-200 uppercase bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-800">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Página (VPN)</th>
+                                        <th scope="col" class="px-6 py-3">Inicio (Hex)</th>
+                                        <th scope="col" class="px-6 py-3">Fin (Hex)</th>
+                                    </tr>
+                                </thead>
+
+                                <!-- ID exclusivo de la tabla grande -->
+                                <tbody id="fullMemoryMapBody"
+                                    class="font-mono text-xs divide-y divide-gray-100 dark:divide-slate-800">
+                                    <!-- Filas inyectadas por JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="fullMemoryMapEmpty" class="hidden px-6 py-8 text-center text-gray-500">
+                            No hay datos de páginas disponibles para mostrar.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- FOOTER INSTITUCIONAL -->
+    <footer
+        class="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 py-4 px-6 text-center text-xs text-gray-500 dark:text-slate-400 font-medium">
+        &copy; 2026 Institución Universitaria Colegio Mayor del Cauca &bull; Facultad de Ingeniería
+    </footer>
+
+    <!-- LOGICA JAVASCRIPT COMPLETA E INTEGRADA -->
+    <script>
+        // ==========================================
+        // ESTADO GLOBAL DE LA APLICACIÓN
+        // ==========================================
+        const appState = {
+            mode: 'pages-from-bus', // 'pages-from-bus', 'size-from-bus', 'bus-from-pages', 'range-didactic'
+            busBits: 16,
+            pageSizeBytes: 4096, // 4 KB
+            totalPages: 16,
+            totalMemoryBytes: 65536,
+            vpnBits: 4,
+            offsetBits: 12,
+            requestedPage: 10,
+            startPage: 0,
+            endPage: 10,
+            inspectorAddress: 0x00A0,
+            lastResultData: null
+        };
+
+        // Nombres didácticos de modos
+        const modeTitles = {
+            'pages-from-bus': 'Calcular Páginas',
+            'size-from-bus': 'Calcular Anchura / Tamaño',
+            'bus-from-pages': 'Calcular Bus de Direcciones',
+            'range-didactic': 'Análisis Didáctico de Memoria'
+        };
+
+        // ==========================================
+        // INICIALIZACIÓN
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            setupNavigation();
+            setupMobileMenu();
+            updateFormVisibility();
+            updatePowerPreview();
+            lucide.createIcons();
+        });
+
+        // ==========================================
+        // TEMA Y NOTIFICACIONES
+        // ==========================================
+        function initTheme() {
+            const savedTheme = localStorage.getItem('appTheme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('appTheme', isDark ? 'dark' : 'light');
+            showToast(isDark ? 'Modo Oscuro activado' : 'Modo Claro activado');
+            lucide.createIcons();
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto px-4 py-2.5 rounded-lg shadow-lg text-xs font-bold bg-brandBlue text-white dark:bg-slate-800 dark:text-brandYellow border border-brandBlue-light dark:border-slate-700 transition-all duration-300 transform translate-y-2';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // ==========================================
+        // MENÚ Y NAVEGACIÓN
+        // ==========================================
+        function setupMobileMenu() {
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            btn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+            });
+        }
+
+        function setupNavigation() {
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mode = btn.getAttribute('data-mode');
+                    switchMode(mode);
+
+                    // Actualizar estilos activos
+                    buttons.forEach(b => {
+                        b.classList.remove('border-brandYellow', 'text-brandBlue', 'bg-amber-50/50', 'dark:bg-slate-800/50', 'font-bold');
+                        b.classList.add('border-transparent');
+                    });
+                    btn.classList.add('border-brandYellow', 'text-brandBlue', 'bg-amber-50/50', 'dark:bg-slate-800/50', 'font-bold');
+                    btn.classList.remove('border-transparent');
+                });
+            });
+        }
+
+        function switchMode(newMode) {
+            appState.mode = newMode;
+            document.getElementById('currentMode').value = newMode;
+            document.getElementById('formTitle').innerText = modeTitles[newMode] || 'Calcular Páginas';
+            updateFormVisibility();
+            updatePowerPreview();
+        }
+
+        function updateFormVisibility() {
+            const mode = appState.mode;
+            const busGroup = document.querySelector('.bus-group');
+            const sizeGroup = document.querySelector('.size-group');
+            const pagesGroup = document.querySelector('.pages-group');
+            const optionalGroup = document.querySelector('.optional-group');
+            const rangeGroups = document.querySelectorAll('.range-group');
+
+            // Restablecer visibilidades
+            busGroup.classList.remove('hidden');
+            sizeGroup.classList.remove('hidden');
+            pagesGroup.classList.add('hidden');
+            optionalGroup.classList.remove('hidden');
+            rangeGroups.forEach(g => g.classList.add('hidden'));
+
+            if (mode === 'pages-from-bus') {
+                // Bus + Size -> Total Pages
+                pagesGroup.classList.add('hidden');
+            } else if (mode === 'size-from-bus') {
+                // Bus + Total Pages -> Size
+                sizeGroup.classList.add('hidden');
+                pagesGroup.classList.remove('hidden');
+            } else if (mode === 'bus-from-pages') {
+                // Size + Total Pages -> Bus
+                busGroup.classList.add('hidden');
+                pagesGroup.classList.remove('hidden');
+            } else if (mode === 'range-didactic') {
+                // Análisis completo por rango
+                rangeGroups.forEach(g => g.classList.remove('hidden'));
+            }
+        }
+
+        // ==========================================
+        // CONVERSIÓN DE UNIDADES Y POTENCIAS DE 2
+        // ==========================================
+        function getPageSizeBytesFromInput() {
+            const val = parseFloat(document.getElementById('pageSizeValue').value) || 1;
+            const unit = document.getElementById('pageSizeUnit').value;
+
+            let bytes = val;
+            if (unit === 'KB') bytes = val * 1024;
+            else if (unit === 'MB') bytes = val * 1024 * 1024;
+            else if (unit === 'GB') bytes = val * 1024 * 1024 * 1024;
+
+            // Sincronizar hidden
+            document.getElementById('pageSizeKb').value = (bytes / 1024).toFixed(2);
+            return Math.max(1, Math.round(bytes));
+        }
+
+        function formatBytes(bytes) {
+            if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
+            if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
+            if (bytes >= 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            return bytes + ' Bytes';
+        }
+
+        function isPowerOfTwo(n) {
+            return n > 0 && (n & (n - 1)) === 0;
+        }
+
+        function nextPowerOfTwo(n) {
+            return Math.pow(2, Math.ceil(Math.log2(Math.max(1, n))));
+        }
+
+        function updatePowerPreview() {
+            const container = document.getElementById('powerPreviewContainer');
+            const busBits = parseInt(document.getElementById('busBits').value) || 16;
+            const pageSizeBytes = getPageSizeBytesFromInput();
+            const totalPagesVal = parseInt(document.getElementById('totalPages').value) || 16;
+
+            let html = '';
+            const totalMem = Math.pow(2, busBits);
+            const offsetBits = Math.round(Math.log2(pageSizeBytes));
+            const pagesBits = Math.round(Math.log2(totalPagesVal));
+
+            html += `<span class="px-2 py-1 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-700">Mem. Total = 2<sup>${busBits}</sup> = ${formatBytes(totalMem)}</span>`;
+
+            if (appState.mode !== 'size-from-bus') {
+                html += `<span class="px-2 py-1 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-700">Offset = 2<sup>${offsetBits}</sup> = ${formatBytes(pageSizeBytes)}</span>`;
+            }
+
+            if (appState.mode === 'size-from-bus' || appState.mode === 'bus-from-pages') {
+                html += `<span class="px-2 py-1 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-700">Páginas = 2<sup>${pagesBits}</sup> = ${totalPagesVal}</span>`;
+            }
+
+            container.innerHTML = html;
+            container.classList.remove('hidden');
+        }
+
+        // ==========================================
+        // PROCESAMIENTO Y MATEMÁTICAS DE SIMULACIÓN
+        // ==========================================
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            hideError();
+
+            try {
+                const mode = appState.mode;
+                let busBits = parseInt(document.getElementById('busBits').value) || 16;
+                let pageSizeBytes = getPageSizeBytesFromInput();
+                let totalPages = parseInt(document.getElementById('totalPages').value) || 16;
+                let reqPage = parseInt(document.getElementById('requestedPage').value) || 0;
+                let startP = parseInt(document.getElementById('startPage').value) || 0;
+                let endP = parseInt(document.getElementById('endPage').value) || 10;
+
+                // Cálculos según modo de operación
+                if (mode === 'pages-from-bus') {
+                    // MODO 1: Calcular Páginas (Bus + Size -> Pages)
+                    if (busBits < 1 || busBits > 128) throw new Error("Los bits del bus deben estar entre 1 y 128.");
+                    const totalMemBytes = Math.pow(2, busBits);
+                    const offsetBits = Math.round(Math.log2(pageSizeBytes));
+                    const vpnBits = busBits - offsetBits;
+
+                    if (vpnBits < 0) throw new Error("El tamaño de página supera la memoria total direccionable por el bus.");
+                    totalPages = Math.pow(2, vpnBits);
+
+                    appState.busBits = busBits;
+                    appState.pageSizeBytes = pageSizeBytes;
+                    appState.totalPages = totalPages;
+                    appState.totalMemoryBytes = totalMemBytes;
+                    appState.vpnBits = vpnBits;
+                    appState.offsetBits = offsetBits;
+
+                } else if (mode === 'size-from-bus') {
+                    // MODO 2: Calcular Anchura / Tamaño (Bus + Total Pages -> Size)
+                    if (!isPowerOfTwo(totalPages)) totalPages = nextPowerOfTwo(totalPages);
+                    const vpnBits = Math.round(Math.log2(totalPages));
+                    const offsetBits = busBits - vpnBits;
+
+                    if (offsetBits < 0) throw new Error("La cantidad de páginas requiere más bits de los disponibles en el bus.");
+                    pageSizeBytes = Math.pow(2, offsetBits);
+                    const totalMemBytes = Math.pow(2, busBits);
+
+                    appState.busBits = busBits;
+                    appState.pageSizeBytes = pageSizeBytes;
+                    appState.totalPages = totalPages;
+                    appState.totalMemoryBytes = totalMemBytes;
+                    appState.vpnBits = vpnBits;
+                    appState.offsetBits = offsetBits;
+
+                } else if (mode === 'bus-from-pages') {
+                    // MODO 3: Calcular Bus (Size + Total Pages -> Bus)
+                    if (!isPowerOfTwo(totalPages)) totalPages = nextPowerOfTwo(totalPages);
+                    const offsetBits = Math.round(Math.log2(pageSizeBytes));
+                    const vpnBits = Math.round(Math.log2(totalPages));
+                    busBits = vpnBits + offsetBits;
+                    const totalMemBytes = Math.pow(2, busBits);
+
+                    appState.busBits = busBits;
+                    appState.pageSizeBytes = pageSizeBytes;
+                    appState.totalPages = totalPages;
+                    appState.totalMemoryBytes = totalMemBytes;
+                    appState.vpnBits = vpnBits;
+                    appState.offsetBits = offsetBits;
+
+                } else if (mode === 'range-didactic') {
+                    // MODO 4: Análisis Didáctico por Rango
+                    const totalMemBytes = Math.pow(2, busBits);
+                    const offsetBits = Math.round(Math.log2(pageSizeBytes));
+                    const vpnBits = busBits - offsetBits;
+                    totalPages = Math.pow(2, vpnBits);
+
+                    appState.busBits = busBits;
+                    appState.pageSizeBytes = pageSizeBytes;
+                    appState.totalPages = totalPages;
+                    appState.totalMemoryBytes = totalMemBytes;
+                    appState.vpnBits = vpnBits;
+                    appState.offsetBits = offsetBits;
+                    appState.startPage = Math.min(startP, totalPages - 1);
+                    appState.endPage = Math.min(endP, totalPages - 1);
+                }
+
+                appState.requestedPage = Math.min(reqPage, appState.totalPages - 1);
+
+                // Renderizar todos los paneles integrados
+                renderResultsPanel();
+                renderSummaryCards();
+                renderMemoryMapTables();
+                renderDidacticTrace();
+                renderBitInspector();
+                renderJsonResponse();
+
+                showToast("Simulación ejecutada con éxito");
+
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        // ==========================================
+        // RENDERIZADO DE RESULTADOS
+        // ==========================================
+        function renderResultsPanel() {
+            const root = document.getElementById('results-root');
+            root.classList.remove('hidden');
+
+            const quickContent = document.getElementById('quickResultContent');
+            const btnDetails = document.getElementById('btnShowDetails');
+
+            quickContent.innerHTML = `
+                <div class="space-y-2 text-left bg-gray-50 dark:bg-slate-800/80 p-4 rounded-lg border border-gray-100 dark:border-slate-700">
+                    <div class="flex justify-between items-center text-xs font-mono">
+                        <span class="text-gray-500 dark:text-slate-400">Total de Páginas:</span>
+                        <strong class="text-brandBlue dark:text-brandYellow text-sm">${appState.totalPages.toLocaleString()}</strong>
+                    </div>
+                    <div class="flex justify-between items-center text-xs font-mono">
+                        <span class="text-gray-500 dark:text-slate-400">Tamaño de Página:</span>
+                        <strong class="text-gray-900 dark:text-white">${formatBytes(appState.pageSizeBytes)}</strong>
+                    </div>
+                    <div class="flex justify-between items-center text-xs font-mono">
+                        <span class="text-gray-500 dark:text-slate-400">Memoria Total:</span>
+                        <strong class="text-gray-900 dark:text-white">${formatBytes(appState.totalMemoryBytes)}</strong>
+                    </div>
+                    <div class="flex justify-between items-center text-xs font-mono pt-1 border-t border-gray-200 dark:border-slate-700">
+                        <span class="text-gray-500 dark:text-slate-400">Bits VPN / Offset:</span>
+                        <strong class="text-brandBlue dark:text-brandYellow">${appState.vpnBits} bits / ${appState.offsetBits} bits</strong>
+                    </div>
+                </div>
+            `;
+
+            btnDetails.classList.remove('hidden');
+        }
+
+        function renderSummaryCards() {
+            const container = document.getElementById('summaryCardsSection');
+            container.classList.remove('hidden');
+
+            container.innerHTML = `
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-slate-800 shadow-sm">
+                    <span class="text-xs font-extrabold text-gray-400 dark:text-slate-500 uppercase">Memoria Virtual</span>
+                    <div class="text-xl font-extrabold text-brandBlue dark:text-white font-mono mt-1">${formatBytes(appState.totalMemoryBytes)}</div>
+                    <span class="text-[10px] text-gray-400 font-mono">2<sup>${appState.busBits}</sup> bytes direccionables</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-slate-800 shadow-sm">
+                    <span class="text-xs font-extrabold text-gray-400 dark:text-slate-500 uppercase">Total Páginas</span>
+                    <div class="text-xl font-extrabold text-brandBlue dark:text-brandYellow font-mono mt-1">${appState.totalPages.toLocaleString()}</div>
+                    <span class="text-[10px] text-gray-400 font-mono">2<sup>${appState.vpnBits}</sup> páginas (VPN)</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-slate-800 shadow-sm">
+                    <span class="text-xs font-extrabold text-gray-400 dark:text-slate-500 uppercase">Tamaño de Página</span>
+                    <div class="text-xl font-extrabold text-brandBlue dark:text-white font-mono mt-1">${formatBytes(appState.pageSizeBytes)}</div>
+                    <span class="text-[10px] text-gray-400 font-mono">2<sup>${appState.offsetBits}</sup> bytes (Offset)</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-slate-800 shadow-sm">
+                    <span class="text-xs font-extrabold text-gray-400 dark:text-slate-500 uppercase">Bus de Direcciones</span>
+                    <div class="text-xl font-extrabold text-brandBlue dark:text-brandYellow font-mono mt-1">${appState.busBits} bits</div>
+                    <span class="text-[10px] text-gray-400 font-mono">${appState.vpnBits} bits VPN + ${appState.offsetBits} bits Offset</span>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // TABLAS DE MAPA DE MEMORIA (SAMPLE Y COMPLETA)
+        // ==========================================
+        function renderMemoryMapTables() {
+            const memoryMapSection = document.getElementById('memoryMapSection');
+            memoryMapSection.classList.remove('hidden');
+
+            const sampleBody = document.getElementById('memoryMapBody');
+            const fullBody = document.getElementById('fullMemoryMapBody');
+            const hexPadLen = Math.ceil(appState.busBits / 4);
+
+            let sampleRows = '';
+            let fullRows = '';
+
+            // Renderizar muestra (primeras 10 páginas)
+            const sampleCount = Math.min(appState.totalPages, 10);
+            for (let i = 0; i < sampleCount; i++) {
+                const startAddr = i * appState.pageSizeBytes;
+                const endAddr = startAddr + appState.pageSizeBytes - 1;
+                const startHex = '0x' + startAddr.toString(16).padStart(hexPadLen, '0').toUpperCase();
+                const endHex = '0x' + endAddr.toString(16).padStart(hexPadLen, '0').toUpperCase();
+                const isReq = (i === appState.requestedPage);
+
+                sampleRows += `
+                    <tr class="${isReq ? 'bg-amber-100/80 dark:bg-amber-950/60 font-bold border-l-4 border-brandYellow' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}">
+                        <td class="px-6 py-3 font-semibold text-gray-900 dark:text-white">Página ${i} (P${i})</td>
+                        <td class="px-6 py-3 text-brandBlue dark:text-brandYellow font-bold">${startHex}</td>
+                        <td class="px-6 py-3 text-gray-600 dark:text-slate-300">${endHex}</td>
+                    </tr>
+                `;
+            }
+            sampleBody.innerHTML = sampleRows;
+
+            // Renderizar desglose completo (hasta un máximo navegable de 256 para rendimiento visual)
+            const maxFullRows = Math.min(appState.totalPages, 256);
+            for (let i = 0; i < maxFullRows; i++) {
+                const startAddr = i * appState.pageSizeBytes;
+                const endAddr = startAddr + appState.pageSizeBytes - 1;
+                const startHex = '0x' + startAddr.toString(16).padStart(hexPadLen, '0').toUpperCase();
+                const endHex = '0x' + endAddr.toString(16).padStart(hexPadLen, '0').toUpperCase();
+                const isReq = (i === appState.requestedPage);
+
+                fullRows += `
+                    <tr class="${isReq ? 'bg-amber-100/80 dark:bg-amber-950/60 font-bold border-l-4 border-brandYellow' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}">
+                        <td class="px-6 py-3 font-semibold text-gray-900 dark:text-white">Página ${i} (VPN ${i})</td>
+                        <td class="px-6 py-3 text-brandBlue dark:text-brandYellow font-bold">${startHex}</td>
+                        <td class="px-6 py-3 text-gray-600 dark:text-slate-300">${endHex}</td>
+                    </tr>
+                `;
+            }
+
+            if (appState.totalPages > 256) {
+                fullRows += `
+                    <tr>
+                        <td colspan="3" class="px-6 py-4 text-center text-xs font-sans text-gray-400 italic">
+                            ... Y ${(appState.totalPages - 256).toLocaleString()} páginas adicionales calculadas.
+                        </td>
+                    </tr>
+                `;
+            }
+
+            fullBody.innerHTML = fullRows;
+            document.getElementById('fullMemoryMapEmpty').classList.add('hidden');
+        }
+
+        // ==========================================
+        // TRAZA PEDAGÓGICA Y DEDUCIBILIDAD
+        // ==========================================
+        function renderDidacticTrace() {
+            const section = document.getElementById('didacticSection');
+            const container = document.getElementById('didacticStepsContainer');
+            section.classList.remove('hidden');
+
+            const hexPadLen = Math.ceil(appState.busBits / 4);
+            const reqStart = appState.requestedPage * appState.pageSizeBytes;
+            const reqEnd = reqStart + appState.pageSizeBytes - 1;
+
+            container.innerHTML = `
+                <div class="p-4 bg-gray-50 dark:bg-slate-800/60 rounded-lg space-y-2 border border-gray-200 dark:border-slate-700">
+                    <h4 class="font-bold text-sm text-brandBlue dark:text-brandYellow">Paso 1: Cálculo del Número de bits para el Offset</h4>
+                    <p class="text-xs text-gray-600 dark:text-slate-300">
+                        Offset = log<sub>2</sub>(Tamaño de Página) = log<sub>2</sub>(${appState.pageSizeBytes} B) = <strong>${appState.offsetBits} bits</strong>.
+                    </p>
+                </div>
+
+                <div class="p-4 bg-gray-50 dark:bg-slate-800/60 rounded-lg space-y-2 border border-gray-200 dark:border-slate-700">
+                    <h4 class="font-bold text-sm text-brandBlue dark:text-brandYellow">Paso 2: Cálculo de bits de Número de Página Virtual (VPN)</h4>
+                    <p class="text-xs text-gray-600 dark:text-slate-300">
+                        VPN Bits = Total Bus Bits - Offset Bits = ${appState.busBits} - ${appState.offsetBits} = <strong>${appState.vpnBits} bits</strong>.
+                    </p>
+                </div>
+
+                <div class="p-4 bg-gray-50 dark:bg-slate-800/60 rounded-lg space-y-2 border border-gray-200 dark:border-slate-700">
+                    <h4 class="font-bold text-sm text-brandBlue dark:text-brandYellow">Paso 3: Total de Páginas Mapeables</h4>
+                    <p class="text-xs text-gray-600 dark:text-slate-300">
+                        Páginas = 2<sup>VPN Bits</sup> = 2<sup>${appState.vpnBits}</sup> = <strong>${appState.totalPages.toLocaleString()} páginas</strong>.
+                    </p>
+                </div>
+
+                <div class="p-4 bg-amber-50 dark:bg-slate-800 rounded-lg space-y-2 border border-amber-200 dark:border-slate-700">
+                    <h4 class="font-bold text-sm text-brandBlue dark:text-brandYellow">Paso 4: Análisis de Página Específica P${appState.requestedPage}</h4>
+                    <p class="text-xs text-gray-700 dark:text-slate-200 font-mono">
+                        Inicio = P${appState.requestedPage} &times; ${formatBytes(appState.pageSizeBytes)} = 0x${reqStart.toString(16).padStart(hexPadLen, '0').toUpperCase()}<br>
+                        Fin = 0x${reqStart.toString(16).padStart(hexPadLen, '0').toUpperCase()} + ${appState.pageSizeBytes - 1} = 0x${reqEnd.toString(16).padStart(hexPadLen, '0').toUpperCase()}
+                    </p>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // INSPECTOR BINARIO DE BITS
+        // ==========================================
+        function renderBitInspector() {
+            const section = document.getElementById('bitInspectorSection');
+            section.classList.remove('hidden');
+
+            const reqAddr = appState.requestedPage * appState.pageSizeBytes;
+            document.getElementById('inspectorAddressInput').value = '0x' + reqAddr.toString(16).padStart(Math.ceil(appState.busBits / 4), '0').toUpperCase();
+
+            updateBitBoxes(reqAddr);
+        }
+
+        function onInspectorInputChange(val) {
+            val = val.trim();
+            let parsed = 0;
+            if (val.toUpperCase().startsWith('P')) {
+                const pageNum = parseInt(val.substring(1)) || 0;
+                parsed = pageNum * appState.pageSizeBytes;
+            } else if (val.toLowerCase().startsWith('0x')) {
+                parsed = parseInt(val, 16) || 0;
+            } else {
+                parsed = parseInt(val, 10) || 0;
+            }
+            updateBitBoxes(parsed);
+        }
+
+        function updateBitBoxes(address) {
+            const totalBits = appState.busBits;
+            const offsetBits = appState.offsetBits;
+            const vpnBits = appState.vpnBits;
+
+            document.getElementById('inspectorVpnBitsLabel').innerText = `${vpnBits} bits`;
+            document.getElementById('inspectorOffsetBitsLabel').innerText = `${offsetBits} bits`;
+
+            const binaryStr = address.toString(2).padStart(totalBits, '0');
+
+            const indicesRow = document.getElementById('bitIndicesRow');
+            const boxesRow = document.getElementById('bitBoxesRow');
+
+            indicesRow.style.gridTemplateColumns = `repeat(${totalBits}, minmax(0, 1fr))`;
+            boxesRow.style.gridTemplateColumns = `repeat(${totalBits}, minmax(0, 1fr))`;
+
+            let indicesHtml = '';
+            let boxesHtml = '';
+
+            for (let i = 0; i < totalBits; i++) {
+                const bitPosFromRight = totalBits - 1 - i;
+                const bitVal = binaryStr[i] || '0';
+                const isVpn = bitPosFromRight >= offsetBits;
+
+                indicesHtml += `<div>${bitPosFromRight}</div>`;
+
+                if (isVpn) {
+                    boxesHtml += `
+                        <div class="py-2 rounded bg-brandBlue text-white font-mono shadow-sm">
+                            ${bitVal}
+                        </div>
+                    `;
+                } else {
+                    boxesHtml += `
+                        <div class="py-2 rounded bg-brandYellow text-brandBlue-dark font-mono shadow-sm">
+                            ${bitVal}
+                        </div>
+                    `;
+                }
+            }
+
+            indicesRow.innerHTML = indicesHtml;
+            boxesRow.innerHTML = boxesHtml;
+        }
+
+        // ==========================================
+        // VISTA JSON DE RESPUESTA SCHEMA
+        // ==========================================
+        function renderJsonResponse() {
+            const jsonView = document.getElementById('jsonResponseView');
+            const responseObj = {
+                status: "success",
+                data: {
+                    mode: appState.mode,
+                    bus_bits: appState.busBits,
+                    page_size_bytes: appState.pageSizeBytes,
+                    page_size_formatted: formatBytes(appState.pageSizeBytes),
+                    total_memory_bytes: appState.totalMemoryBytes,
+                    total_pages: appState.totalPages,
+                    vpn_bits: appState.vpnBits,
+                    offset_bits: appState.offsetBits,
+                    requested_page_info: {
+                        page_number: appState.requestedPage,
+                        start_hex: "0x" + (appState.requestedPage * appState.pageSizeBytes).toString(16).toUpperCase(),
+                        end_hex: "0x" + ((appState.requestedPage + 1) * appState.pageSizeBytes - 1).toString(16).toUpperCase()
+                    }
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            jsonView.innerText = JSON.stringify(responseObj, null, 2);
+        }
+
+        // ==========================================
+        // VISTA MODAL PANTALLA COMPLETA
+        // ==========================================
+        function openFullBreakdownView() {
+            document.getElementById('fullBreakdownView').classList.remove('hidden');
+        }
+
+        function closeFullBreakdownView() {
+            document.getElementById('fullBreakdownView').classList.add('hidden');
+        }
+
+        // ==========================================
+        // MANEJO DE ERRORES
+        // ==========================================
+        function showError(msg) {
+            const errBox = document.getElementById('errorContainer');
+            errBox.innerText = `Error: ${msg}`;
+            errBox.classList.remove('hidden');
+        }
+
+        function hideError() {
+            const errBox = document.getElementById('errorContainer');
+            errBox.innerText = '';
+            errBox.classList.add('hidden');
+        }
+    </script>
+
+    <!-- Integración con la API FastAPI: primero el cliente HTTP y después el método principal. -->
+    <script src="/js/api.js"></script>
+    <script src="/js/main.js"></script>
 </body>
+
 </html>

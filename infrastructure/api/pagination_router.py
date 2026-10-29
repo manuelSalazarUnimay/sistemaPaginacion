@@ -12,6 +12,9 @@ from infrastructure.api.dtos import (
     PageRangeResponseDTO,
     DidacticStepDTO
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/pagination", tags=["Simulador de Paginación"])
 service = PaginationService()
@@ -147,8 +150,20 @@ def get_didactic_page_range(
             start_address_hex=result.start_address_hex,
             end_address_hex=result.end_address_hex,
             segmentation=_map_segmentation(result.segmentation),
-            pages_sample=[MemoryPageDTO(**p.__dict__) for p in result.pages_sample],
+            pages_sample=[
+                MemoryPageDTO(
+                    page_number=p.page_number,
+                    start_address=p.start_address,
+                    end_address=p.end_address,
+                    start_address_hex=p.start_address_hex,
+                    end_address_hex=p.end_address_hex,
+                )
+                for p in result.pages_sample
+            ],
             steps=[DidacticStepDTO(**s.__dict__) for s in result.steps]
         )
     except DomainException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception:
+        logger.exception("Error inesperado en /range-didactic")
+        raise
