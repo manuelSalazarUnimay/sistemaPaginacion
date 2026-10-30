@@ -1,21 +1,39 @@
-<header class="bg-brandYellow text-brandBlue-dark shadow-md flex items-center justify-between px-6 py-4">
+<!-- COMPONENTE 1: HEADER -->
+<header
+        class="bg-brandYellow text-brandBlue-dark shadow-md flex items-center justify-between px-6 py-4 sticky top-0 z-40">
     <div class="flex items-center gap-4">
         <!-- Menú hamburguesa para móvil -->
-        <button id="mobileMenuBtn" class="md:hidden text-brandBlue-dark focus:outline-none hover:opacity-75 transition-opacity">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        <button id="mobileMenuBtn"
+                class="md:hidden text-brandBlue-dark focus:outline-none hover:opacity-75 transition-opacity">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                </path>
             </svg>
         </button>
         <div class="flex flex-col">
-            <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
-                 Simulador de Paginación
+            <h1 class="text-xl sm:text-2xl font-bold tracking-wide flex items-center gap-2">
+                <i data-lucide="cpu" class="w-6 h-6 text-brandBlue-dark"></i>
+                Simulador de Paginación
             </h1>
-            <span class="text-sm font-semibold tracking-widest uppercase">Paginación de Memoria</span>
+            <span class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-brandBlue">Paginación de
+                    Memoria</span>
         </div>
     </div>
 
-    <div class="hidden sm:flex items-center">
+    <div class="flex items-center gap-3">
+        <!-- Switch Modo Oscuro -->
+        <button id="themeToggleBtn" onclick="toggleTheme()"
+                class="p-2 rounded-lg bg-white/40 dark:bg-slate-800/60 hover:bg-white/60 transition shadow-sm text-brandBlue-dark dark:text-amber-400"
+                title="Cambiar Tema">
+            <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+            <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+        </button>
+
         <!-- Logo Institucional a la derecha -->
-        <img src="assets/logo-institucion2.png" alt="Logo Institución" class="h-12 object-contain" onerror="this.style.display='none'">
+        <div class="hidden sm:flex items-center">
+            <img src="assets/logo-institucion2.png" alt="Logo Institución" class="h-10 object-contain"
+                 onerror="this.style.display='none'">
+        </div>
     </div>
 </header>

@@ -1,39 +1,45 @@
-<aside class="h-full flex flex-col bg-white border-r border-gray-200 w-full">
-
+<!-- COMPONENTE 4: SIDEBAR -->
+<aside id="sidebar"
+       class="h-auto md:h-auto flex flex-col bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 w-full md:w-64 flex-shrink-0 transition-all duration-300">
     <nav class="flex-1 p-4 space-y-2 overflow-y-auto" id="sidebarNav">
-        <div class="p-6 border-b border-gray-100">
-            <h2 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Módulos de Cálculo</h2>
+        <div class="p-4 border-b border-gray-100 dark:border-slate-800">
+            <h2 class="text-xs font-extrabold text-gray-400 dark:text-slate-500 uppercase tracking-widest">
+                Módulos de Cálculo</h2>
         </div>
         <!-- Opción 1: Calcular Páginas -->
-        <button class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 font-medium transition-all hover:bg-gray-50 border-l-4 border-transparent hover:border-gray-300"
+        <button
+                class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 dark:text-slate-300 font-medium transition-all hover:bg-gray-50 dark:hover:bg-slate-800 border-l-4 border-transparent hover:border-brandYellow text-brandBlue font-bold bg-amber-50/50 dark:bg-slate-800/50"
                 data-mode="pages-from-bus">
-            <div class="text-sm font-bold opacity-70">Opción 1</div>
-            <div class="text-base">Calcular Páginas</div>
+            <div class="text-xs font-bold opacity-70 uppercase">Opción 1</div>
+            <div class="text-sm font-semibold">Calcular Páginas</div>
         </button>
 
         <!-- Opción 2: Calcular Anchura -->
-        <button class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 font-medium transition-all hover:bg-gray-50 border-l-4 border-transparent hover:border-gray-300"
+        <button
+                class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 dark:text-slate-300 font-medium transition-all hover:bg-gray-50 dark:hover:bg-slate-800 border-l-4 border-transparent hover:border-gray-300"
                 data-mode="size-from-bus">
-            <div class="text-sm font-bold opacity-70">Opción 2</div>
-            <div class="text-base">Calcular Anchura</div>
+            <div class="text-xs font-bold opacity-70 uppercase">Opción 2</div>
+            <div class="text-sm font-semibold">Calcular Anchura</div>
         </button>
 
         <!-- Opción 3: Calcular Bus -->
-        <button class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 font-medium transition-all hover:bg-gray-50 border-l-4 border-transparent hover:border-gray-300"
+        <button
+                class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 dark:text-slate-300 font-medium transition-all hover:bg-gray-50 dark:hover:bg-slate-800 border-l-4 border-transparent hover:border-gray-300"
                 data-mode="bus-from-pages">
-            <div class="text-sm font-bold opacity-70">Opción 3</div>
-            <div class="text-base">Calcular Bus</div>
+            <div class="text-xs font-bold opacity-70 uppercase">Opción 3</div>
+            <div class="text-sm font-semibold">Calcular Bus</div>
         </button>
 
         <!-- Opción 4: Análisis Didáctico -->
-        <button class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 font-medium transition-all hover:bg-gray-50 border-l-4 border-transparent hover:border-gray-300"
+        <button
+                class="nav-btn w-full text-left px-4 py-3 rounded-md text-gray-600 dark:text-slate-300 font-medium transition-all hover:bg-gray-50 dark:hover:bg-slate-800 border-l-4 border-transparent hover:border-gray-300"
                 data-mode="range-didactic">
-            <div class="text-sm font-bold opacity-70">Opción 4</div>
-            <div class="text-base">Análisis Didáctico</div>
+            <div class="text-xs font-bold opacity-70 uppercase">Opción 4</div>
+            <div class="text-sm font-semibold">Análisis Didáctico</div>
         </button>
     </nav>
 
-    <div class="p-4 border-t border-gray-100 text-center">
-        <span class="text-xs text-gray-400 font-medium">Versión 1.0.0</span>
+    <div class="p-4 border-t border-gray-100 dark:border-slate-800 text-center">
+        <span class="text-xs text-gray-400 dark:text-slate-500 font-medium">Versión 1.0.0</span>
     </div>
 </aside>

@@ -1,0 +1,45 @@
+    <!-- BIT INSPECTOR DIDÁCTICO INTEGRADOR -->
+    <div id="bitInspectorSection"
+         class="hidden bg-white dark:bg-slate-900 rounded-lg p-6 border border-gray-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b pb-3 border-gray-100 dark:border-slate-800">
+            <div>
+                <h3 class="text-lg font-bold text-brandBlue dark:text-white flex items-center gap-2">
+                    <i data-lucide="binary" class="w-5 h-5 text-brandYellow"></i>
+                    Inspector Binario & Desglose de Bits
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-slate-400">Representación lógica de la dirección de
+                    memoria virtual seleccionada.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="text" id="inspectorAddressInput" value="0x0000"
+                       oninput="onInspectorInputChange(this.value)"
+                       class="px-3 py-1.5 text-xs font-mono font-bold rounded border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-900 dark:text-white w-32 focus:outline-none"
+                       placeholder="Ej: 0x00A0 o P5">
+            </div>
+        </div>
+
+        <!-- Cajas de bits -->
+        <div class="space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold font-mono">
+                        <span class="text-brandBlue dark:text-blue-300 flex items-center gap-1">
+                            <span class="w-3 h-3 rounded-full bg-brandBlue inline-block"></span>
+                            VPN (Página): <span id="inspectorVpnBitsLabel">4 bits</span>
+                        </span>
+                <span class="text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                            Offset (Desplazamiento): <span id="inspectorOffsetBitsLabel">12 bits</span>
+                            <span class="w-3 h-3 rounded-full bg-brandYellow inline-block"></span>
+                        </span>
+            </div>
+
+            <div class="overflow-x-auto pb-2">
+                <div class="min-w-[480px]">
+                    <div id="bitIndicesRow"
+                         class="grid gap-1 mb-1 text-center font-mono text-[10px] text-gray-400 font-bold select-none">
+                    </div>
+                    <div id="bitBoxesRow" class="grid gap-1 font-mono text-xs sm:text-sm font-bold text-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

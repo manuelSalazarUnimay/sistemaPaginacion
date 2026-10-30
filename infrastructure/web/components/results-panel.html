@@ -1,110 +1,173 @@
-<div id="results-root" class="mt-8 hidden">
-    <div id="mainDashboard" class="space-y-8">
-        <!-- Tarjetas de Resumen -->
-        <div id="summaryCardsSection" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div id="results-root" class="hidden">
+    <section id="fullBreakdownView"
+             class="fixed inset-0 w-full h-full min-h-screen bg-gray-50 dark:bg-slate-950 z-[100] p-4 sm:p-6 overflow-y-auto">
+        <div class="max-w-7xl mx-auto">
+            <header class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-5 bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-brandBlue dark:text-white">Desglose procedimental</h2>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">Explora cada parte del resultado sin alargar la
+                        pantalla principal</p>
+                </div>
+                <button id="btnBackToMain" type="button" onclick="closeFullBreakdownView()"
+                        class="px-4 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-md text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors text-slate-800 dark:text-white">
+                    &larr; Regresar al simulador
+                </button>
+            </header>
+
+            <nav aria-label="Secciones del desglose" class="flex gap-2 overflow-x-auto pb-3 mb-4">
+                <button data-detail-index="0" class="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold">Resumen
+                </button>
+                <button data-detail-index="1" class="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold">Mapa de
+                    memoria
+                </button>
+                <button data-detail-index="2" class="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold">Traza
+                    pedagógica
+                </button>
+                <button data-detail-index="3" class="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold">Inspector
+                    binario
+                </button>
+                <button data-detail-index="4" class="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold">Respuesta
+                    API
+                </button>
+                <button data-detail-index="5" class="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold">Mapa
+                    completo
+                </button>
+            </nav>
+
+            <div class="relative min-h-[55vh]">
+                <article data-detail-slide="0"
+                         class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm p-5 sm:p-6 space-y-5">
+                    <h3 class="text-lg font-bold text-brandBlue dark:text-white">Resumen de la simulación</h3>
+                    <!-- Tarjetas de Resumen -->
+                    <div id="summaryCardsSection" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Inyectadas por JS -->
+                    </div>
+                    <div class="hidden" id="summaryCardsFallback"></div>
+                </article>
+
+                <article data-detail-slide="1"
+                         class="hidden bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm p-5 sm:p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-brandBlue dark:text-white">Mapa de memoria (muestra)</h3>
+                    <!-- Tabla Original (Vista Rápida) -->
+                    <div id="memoryMapSection"
+                         class="hidden bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+                        <div class="bg-brandBlue text-white px-6 py-4 flex justify-between items-center">
+                            <h3 class="font-bold text-lg">Mapa de Memoria Simulado</h3>
+                            <span id="memoryMapBadge"
+                                  class="text-xs bg-white/20 px-2.5 py-1 rounded font-mono font-semibold">pages_sample</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                                <thead
+                                        class="text-xs text-gray-700 dark:text-slate-200 uppercase bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-800">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Página (VPN)</th>
+                                    <th scope="col" class="px-6 py-3">Inicio (Hex)</th>
+                                    <th scope="col" class="px-6 py-3">Fin (Hex)</th>
+                                </tr>
+                                </thead>
+                                <tbody id="memoryMapBody"
+                                       class="font-mono text-xs divide-y divide-gray-100 dark:divide-slate-800">
+                                <!-- Filas inyectadas por JS para la vista rápida -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </article>
+
+                <article data-detail-slide="2"
+                         class="hidden bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm p-5 sm:p-6 space-y-4">
+                    <!-- Traza Pedagógica -->
+                    <div id="didacticSection"
+                         class="hidden bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 border-l-4 border-brandBlue">
+                        <h3 class="text-xl font-bold mb-4 text-brandBlue-dark dark:text-brandYellow">Traza Pedagógica
+                            del Análisis</h3>
+                        <div id="didacticStepsContainer" class="space-y-4">
+                            <!-- Inyectado por JS -->
+                        </div>
+                    </div>
+                </article>
+
+                <article data-detail-slide="3"
+                         class="hidden bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm shadow-sm p-5 sm:p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-brandBlue dark:text-white">Inspector binario</h3>
+                    <div id="bit-inspector-root"></div>
+                </article>
+
+                <article data-detail-slide="4"
+                         class="hidden bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm p-5 sm:p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-brandBlue dark:text-white">Respuesta de la API</h3>
+                    <!-- Acordeón para el JSON -->
+                    <details
+                            class="bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg cursor-pointer shadow-sm">
+                        <summary
+                                class="px-4 py-3 font-semibold text-gray-700 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 rounded-t-lg focus:outline-none flex justify-between items-center text-sm">
+                            <span>Ver JSON de Respuesta (API)</span>
+                            <span class="text-xs text-gray-400 font-mono">JSON Schema</span>
+                        </summary>
+                        <div class="p-4 bg-gray-900 text-green-400 font-mono text-xs overflow-x-auto rounded-b-lg">
+                            <pre id="jsonResponseView">Esperando datos...</pre>
+                        </div>
+                    </details>
+                </article>
+
+                <article data-detail-slide="5"
+                         class="hidden bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm p-5 sm:p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-brandBlue dark:text-white">Mapa de memoria completo</h3>
+                    <section
+                            class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+                        <!-- Mapa completo de memoria -->
+                        <div
+                                class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+
+                            <div class="bg-brandBlue text-white px-6 py-4 flex justify-between items-center">
+                                <h3 class="font-bold text-lg">
+                                    Mapa de Memoria (Datos devueltos por la API)
+                                </h3>
+
+                                <span id="fullMemoryMapBadge" class="text-xs bg-white/20 px-2 py-1 rounded font-mono">
+                                Desglose completo
+                            </span>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                                    <thead
+                                            class="text-xs text-gray-700 dark:text-slate-200 uppercase bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-800">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Página (VPN)</th>
+                                        <th scope="col" class="px-6 py-3">Inicio (Hex)</th>
+                                        <th scope="col" class="px-6 py-3">Fin (Hex)</th>
+                                    </tr>
+                                    </thead>
+
+                                    <!-- ID exclusivo de la tabla grande -->
+                                    <tbody id="fullMemoryMapBody"
+                                           class="font-mono text-xs divide-y divide-gray-100 dark:divide-slate-800">
+                                    <!-- Filas inyectadas por JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="fullMemoryMapEmpty" class="hidden px-6 py-8 text-center text-gray-500">
+                                No hay datos de páginas disponibles para mostrar.
+                            </div>
+                        </div>
+                    </section>
+                </article>
+            </div>
+
+            <footer class="flex items-center justify-between gap-3 mt-5">
+                <button id="detailPrev" type="button"
+                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
+                    Anterior
+                </button>
+                <span id="detailStepLabel" class="text-xs font-semibold text-gray-500 dark:text-slate-400">Sección 1 de 6</span>
+                <button id="detailNext" type="button"
+                        class="px-4 py-2 rounded-lg bg-brandBlue text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
+                    Siguiente
+                </button>
+            </footer>
         </div>
-
-        <!-- Acordeón para el JSON -->
-        <details class="bg-gray-50 border border-gray-200 rounded-lg cursor-pointer shadow-sm">
-            <summary
-                    class="px-4 py-3 font-semibold text-gray-700 bg-gray-100 rounded-t-lg focus:outline-none flex justify-between items-center">
-                <span>Ver JSON de Respuesta (API)</span>
-                <span class="text-xs text-gray-400 font-normal">JSON Schema</span>
-            </summary>
-            <div class="p-4 bg-gray-900 text-green-400 font-mono text-xs overflow-x-auto rounded-b-lg">
-                <pre id="jsonResponseView">Esperando datos...</pre>
-            </div>
-        </details>
-
-        <!-- Tabla Original (Vista Rápida) -->
-        <div id="memoryMapSection" class="hidden bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div class="bg-brandBlue text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-lg">Mapa de Memoria Simulado</h3>
-                <span id="memoryMapBadge" class="text-xs bg-white/20 px-2 py-1 rounded">pages_sample</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-500">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">Página (VPN)</th>
-                        <th scope="col" class="px-6 py-3">Inicio (Hex)</th>
-                        <th scope="col" class="px-6 py-3">Fin (Hex)</th>
-                    </tr>
-                    </thead>
-                    <tbody id="memoryMapBody">
-                    <!-- Filas inyectadas por JS para la vista rápida -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Traza Pedagógica -->
-        <div id="didacticSection"
-             class="hidden bg-white p-6 rounded-lg shadow-sm border border-gray-200 border-l-4 border-brandBlue">
-            <h3 class="text-xl font-bold mb-4 text-brandBlue-dark">Traza Pedagógica del Análisis</h3>
-            <div id="didacticStepsContainer" class="space-y-4">
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Contenedor de pantalla completa: Desglose detallado -->
-    <div id="fullBreakdownView"
-         class="hidden fixed inset-0 w-full h-full min-h-screen bg-gray-50 z-[100] p-6 overflow-y-auto">
-
-        <!-- Encabezado y navegación -->
-        <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div>
-                <h2 class="text-xl font-bold text-brandBlue">
-                    Desglose Procedimental
-                </h2>
-                <p class="text-sm text-gray-500">
-                    Estructura detallada de la memoria
-                </p>
-            </div>
-
-            <button id="btnBackToMain"
-                    type="button"
-                    class="px-4 py-2 border border-gray-300 rounded-md text-sm font-semibold hover:bg-gray-100 transition-colors">
-                &larr; Regresar al Simulador
-            </button>
-        </div>
-
-        <!-- Mapa completo de memoria -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-
-            <div class="bg-brandBlue text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-lg">
-                    Mapa de Memoria Simulado
-                </h3>
-
-                <span id="fullMemoryMapBadge"
-                      class="text-xs bg-white/20 px-2 py-1 rounded">
-                Desglose completo
-            </span>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-500">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 border-b">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">Página (VPN)</th>
-                        <th scope="col" class="px-6 py-3">Inicio (Hex)</th>
-                        <th scope="col" class="px-6 py-3">Fin (Hex)</th>
-                    </tr>
-                    </thead>
-
-                    <!-- ID exclusivo de la tabla grande -->
-                    <tbody id="fullMemoryMapBody">
-                    <!-- Filas inyectadas por renderizarTablaMemoria() -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="fullMemoryMapEmpty"
-                 class="hidden px-6 py-8 text-center text-gray-500">
-                No hay datos de páginas disponibles para mostrar.
-            </div>
-        </div>
-    </div>
+    </section>
 </div>

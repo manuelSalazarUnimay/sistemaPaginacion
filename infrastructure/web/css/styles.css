@@ -1,10 +1,51 @@
+
+/* =========================================
+   PALETA INSTITUCIONAL
+   ========================================= */
+
 :root {
-    --brand-blue: #00497F;
-    --brand-yellow: #EFCB20;
-    --brand-yellow-hover: #d6b313;
-    --bg-card: #ffffff;
-    --text-primary: #1e293b;
-    --text-muted: #64748b;
+    --brand-blue: #003B63;
+    --brand-blue-dark: #002A47;
+    --brand-blue-light: #0B4D7B;
+
+    --brand-yellow: #F5BE0B;
+    --brand-yellow-hover: #D9A107;
+
+    --bg-page: #F3F4F6;
+    --bg-card: #FFFFFF;
+    --bg-sidebar: #F0F4F8;
+    --bg-navigation: #F8FAFC;
+
+    --text-primary: #1E293B;
+    --text-muted: #64748B;
+
+    --border-color: #E2E8F0;
+}
+
+/* =========================================
+   VARIABLES DEL MODO OSCURO
+   ========================================= */
+
+.dark {
+    --bg-page: #020617;
+    --bg-card: #0F172A;
+    --bg-sidebar: #0F172A;
+    --bg-navigation: #1E293B;
+
+    --text-primary: #F1F5F9;
+    --text-muted: #94A3B8;
+
+    --border-color: #334155;
+}
+
+/* =========================================
+   ESTILOS GENERALES
+   ========================================= */
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    transition: background-color .3s ease, color .3s ease;
 }
 
 .converter-container {
@@ -13,123 +54,240 @@
     width: 100%;
 }
 
-.btn-primary-action {
-    background-color: var(--brand-yellow);
-    color: #172554;
-    font-weight: 700;
-    transition: background-color 0.2s ease, transform 0.1s ease;
+.quick-result-card {
+    background-color: var(--bg-card);
 }
-.btn-primary-action:hover {
-    background-color: var(--brand-yellow-hover);
+
+#results-root > *,
+#mainDashboard > * {
+    transition: background-color .3s ease;
 }
 
 /* =========================================
-   Estilos personalizados para el Header
+   HEADER INSTITUCIONAL
    ========================================= */
 
-/* 1. Fondo degradado, padding (tamaño) y borde inferior */
 header {
-    background: linear-gradient(90deg, #dca80f 0%, #ffd947 50%, #dca80f 100%) !important;
+    background: linear-gradient(
+        90deg,
+        #DCA80F 0%,
+        #FFD947 50%,
+        #DCA80F 100%
+    ) !important;
+
+    border-bottom: 5px solid var(--brand-blue-dark);
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
-    border-bottom: 5px solid #002b5e !important;
 }
 
-/* 2. Color azul oscuro y sombreado para el título principal */
 header h1 {
-    color: #002b5e !important;
-    font-size: 2.1rem !important;
-    text-shadow: 2px 2px 4px rgba(0, 43, 94, 0.4) !important;
+    color: var(--brand-blue-dark) !important;
+    text-shadow: 2px 2px 4px rgba(0, 43, 94, .25);
 }
 
-/* 3. Ajustes y sombreado para el subtítulo */
 header span {
-    color: #004085 !important;
-    font-size: 1rem !important;
-    font-weight: 800 !important;
-    text-shadow: 1px 1px 3px rgba(0, 43, 94, 0.3) !important;
+    color: var(--brand-blue) !important;
+    font-weight: 800;
 }
 
-/* 4. Aumentar el tamaño del logo institucional a la derecha */
-header img {
-    height: 5.5rem !important;
-    max-height: none !important;
-}
-
-/* Opcional: Color de los íconos */
 header svg {
-    color: #002b5e !important;
+    color: var(--brand-blue-dark);
+}
+
+header img {
+    height: 5.5rem;
+    max-height: none;
+    object-fit: contain;
 }
 
 /* =========================================
-   Estilos personalizados para el Sidebar (UI Suavizada)
+   BOTÓN DE ACCIÓN PRINCIPAL
    ========================================= */
 
-/* 1. Fondo exterior gris azulado muy suave */
+.btn-primary-action {
+    background-color: var(--brand-yellow) !important;
+    color: var(--brand-blue-dark) !important;
+    font-weight: 700;
+    transition: background-color .2s ease, transform .1s ease;
+}
+
+.btn-primary-action:hover {
+    background-color: var(--brand-yellow-hover) !important;
+}
+
+.btn-primary-action:active {
+    transform: scale(.99);
+}
+
+/* =========================================
+   SIDEBAR - MODO CLARO
+   ========================================= */
+
 aside {
-    background-color: #f0f4f8 !important;
-    border-right: none !important;
-    padding: 1.5rem !important;
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1px solid var(--border-color);
+    padding: 1rem;
 }
 
-/* 2. Tarjeta de navegación integrada y más redondeada */
 #sidebarNav {
-    background-color: #f8fafc !important; /* Blanco apagado para reducir el contraste */
-    border-radius: 1rem !important; /* Borde más redondeadito */
-    border: 1px solid rgba(0, 73, 127, 0.15) !important; /* Borde azul oscuro con baja opacidad */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important; /* Sombra muy tenue para que no flote tanto */
-    padding: 1rem !important;
-    height: auto !important;
+    background-color: var(--bg-navigation) !important;
+    border: 1px solid rgba(0, 73, 127, .15);
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .03);
+    padding: 1rem;
 }
 
-/* 3. Centrar el título de los módulos y ajustar su contenedor */
-aside .p-6.border-b {
-    text-align: center !important;
-    border-color: transparent !important;
-    padding-bottom: 0.75rem !important;
+aside .p-6.border-b,
+aside .p-4.border-b {
+    text-align: center;
 }
 
 /* =========================================
-   Interacciones de los Botones (Borde izquierdo amarillo, Activo azul)
+   NAVEGACIÓN
    ========================================= */
 
-/* 4. Estilos base (Inactivos: textos en gris, sin fondo) */
 .nav-btn {
     background-color: transparent !important;
-    border: none !important; /* Quita cualquier otro borde */
-    border-left: 4px solid transparent !important; /* Reserva el espacio para el "bordecito" */
-    border-radius: 0.5rem !important;
-    color: #64748b !important; /* Textos en gris */
-    margin-bottom: 0.5rem !important;
-    padding: 0.75rem 1rem !important;
-    transition: all 0.2s ease-in-out !important;
+    border: none !important;
+    border-left: 4px solid transparent !important;
+    border-radius: .5rem !important;
+
+    color: var(--text-muted) !important;
+
+    margin-bottom: .5rem;
+    padding: .75rem 1rem !important;
+
+    transition: all .2s ease-in-out;
+}
+
+.nav-btn:hover {
+    background-color: rgba(245, 190, 11, .10) !important;
+    border-left-color: var(--brand-yellow) !important;
+    color: var(--brand-blue) !important;
+}
+
+/* Estado seleccionado */
+
+.nav-btn.active,
+.nav-btn.bg-blue-50 {
+    background-color: var(--brand-blue) !important;
+    border-left-color: var(--brand-yellow) !important;
+    color: #FFFFFF !important;
+
+    box-shadow: 0 4px 6px rgba(0, 73, 127, .2);
+}
+
+.nav-btn.active:hover,
+.nav-btn.bg-blue-50:hover {
+    background-color: var(--brand-blue) !important;
+    border-left-color: var(--brand-yellow) !important;
+    color: #FFFFFF !important;
 }
 
 .nav-btn div {
     color: inherit !important;
-    transition: inherit !important;
 }
 
-/* 5. Efecto Hover: SOLO el bordecito izquierdo se vuelve amarillo */
-.nav-btn:hover {
-    background-color: transparent !important; /* Mantiene el fondo limpio */
-    border-left-color: var(--brand-yellow) !important; /* Pinta el bordecito de amarillo */
-    color: #334155 !important; /* Oscurece sutilmente el texto */
+/* =========================================
+   SIDEBAR - MODO OSCURO
+   ========================================= */
+
+.dark aside {
+    background-color: #0F172A !important;
+    border-right-color: #1E293B;
 }
 
-/* 6. ESTADO ACTIVO: Azul oscuro sólido con texto blanco */
-.nav-btn.bg-blue-50,
-.nav-btn.active {
-    background-color: var(--brand-blue) !important; /* Fondo azul */
-    border-left-color: var(--brand-blue) !important; /* El bordecito se camufla con el fondo azul */
-    color: #ffffff !important; /* Texto blanco */
-    box-shadow: 0 4px 6px rgba(0, 73, 127, 0.3) !important;
+.dark #sidebarNav {
+    background-color: #172337 !important;
+    border-color: #334155;
+    box-shadow: none;
 }
 
-/* Mantener el estado activo intacto aunque se pase el cursor encima */
-.nav-btn.bg-blue-50:hover,
-.nav-btn.active:hover {
+.dark .nav-btn {
+    color: #CBD5E1 !important;
+}
+
+.dark .nav-btn:hover {
+    background-color: rgba(245, 190, 11, .10) !important;
+    border-left-color: var(--brand-yellow) !important;
+    color: var(--brand-yellow) !important;
+}
+
+.dark .nav-btn.active,
+.dark .nav-btn.bg-blue-50 {
     background-color: var(--brand-blue) !important;
-    border-left-color: var(--brand-blue) !important;
-    color: #ffffff !important;
+    border-left-color: var(--brand-yellow) !important;
+    color: #FFFFFF !important;
+}
+
+/* =========================================
+   TARJETAS Y CONTENEDORES
+   ========================================= */
+
+.dark .converter-container,
+.dark .quick-result-card {
+    background-color: #0F172A;
+    border-color: #334155;
+}
+
+.dark #powerPreviewContainer {
+    background-color: #1E293B;
+}
+
+/* =========================================
+   BOTÓN DE CAMBIO DE TEMA
+   ========================================= */
+
+#themeToggleBtn {
+    transition: all .2s ease;
+}
+
+#themeToggleBtn:hover {
+    transform: rotate(10deg);
+}
+
+/* =========================================
+   ANIMACIÓN AMARILLA DE MEMORIA
+   ========================================= */
+
+@keyframes memoryPulse {
+    0%, 100% {
+        border-color: #F5BE0B;
+        box-shadow: 0 0 10px rgba(245, 190, 11, .4);
+    }
+
+    50% {
+        border-color: #D9A107;
+        box-shadow: 0 0 20px rgba(245, 190, 11, .8);
+    }
+}
+
+.pulse-selected {
+    animation: memoryPulse 1.8s ease-in-out infinite;
+}
+
+/* =========================================
+   SCROLLBAR
+   ========================================= */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, .05);
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, .05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, .4);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, .6);
 }
