@@ -1,0 +1,192 @@
+<main class="flex-1 p-4 md:p-6 space-y-6 overflow-x-hidden">
+
+    <!-- COMPONENTE 2: FORMULARIO Y RESULTADO INMEDIATO -->
+    <div class="flex flex-col xl:flex-row gap-6">
+        <!-- Contenedor del Formulario -->
+        <div
+                class="converter-container bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6 flex-1 relative">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="w-6 h-6 text-brandYellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                    </path>
+                </svg>
+                <h2 id="formTitle" class="text-xl font-bold text-brandBlue dark:text-white">Calcular Páginas
+                </h2>
+            </div>
+
+            <form id="calcForm" class="space-y-4" onsubmit="main(event)">
+                <input type="hidden" id="currentMode" value="pages-from-bus">
+
+                <!-- Fila 1 de inputs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <!-- Grupo Bus -->
+                    <div class="input-group bus-group">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Bits del
+                            Bus</label>
+                        <select id="busBits"
+                                class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white rounded-md p-3 focus:ring-brandBlue focus:border-brandBlue font-semibold text-sm transition-colors">
+                            <option value="8">8 bits</option>
+                            <option value="12">12 bits</option>
+                            <option value="16" selected>16 bits</option>
+                            <option value="32">32 bits</option>
+                            <option value="64">64 bits</option>
+                        </select>
+                    </div>
+
+                    <!-- Grupo Tamaño con Selector de Unidad -->
+                    <div class="input-group size-group">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Tamaño de
+                            Página</label>
+                        <div class="flex gap-2 mt-1">
+                            <input type="number" step="any" id="pageSizeValue" min="0.1" value="4"
+                                   class="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 focus:ring-brandBlue focus:border-brandBlue font-mono"
+                                   placeholder="Ej: 4" oninput="updatePowerPreview()">
+
+                            <!-- Selector de unidades agregadas (B, KB, MB, GB) -->
+                            <select id="pageSizeUnit" onchange="updatePowerPreview()"
+                                    class="border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white rounded-md px-3 font-semibold text-sm focus:ring-brandBlue focus:border-brandBlue">
+                                <option value="B">Bytes</option>
+                                <option value="KB" selected>KB</option>
+                                <option value="MB">MB</option>
+                                <option value="GB">GB</option>
+                            </select>
+                        </div>
+                        <!-- Input oculto para mantener compatibilidad con referencias anteriores id="pageSizeKb" -->
+                        <input type="hidden" id="pageSizeKb" value="4">
+                    </div>
+
+                    <!-- Grupo Cantidad de Páginas -->
+                    <div class="input-group pages-group hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Total de
+                            Páginas</label>
+                        <input type="number" id="totalPages" min="1" value="16"
+                               class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 focus:ring-brandBlue focus:border-brandBlue font-mono"
+                               placeholder="Ej: 1024" oninput="updatePowerPreview()">
+                    </div>
+                </div>
+
+                <!-- Previsualización Didáctica de Potencias -->
+                <div id="powerPreviewContainer"
+                     class="hidden p-4 bg-amber-50/60 dark:bg-slate-800/60 border border-amber-200 dark:border-slate-700 rounded-md my-4 flex justify-center gap-3 flex-wrap text-xs font-mono">
+                    <!-- Llenado dinámicamente -->
+                </div>
+
+                <!-- Fila 2 de inputs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="input-group optional-group">
+                        <label class="block text-sm font-medium text-gray-500 dark:text-slate-400">Página
+                            Específica (Opcional)</label>
+                        <input type="number" id="requestedPage" min="0" value="10"
+                               class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 font-mono"
+                               placeholder="Ej: 10">
+                    </div>
+
+                    <div class="input-group range-group hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Página
+                            Inicial</label>
+                        <input type="number" id="startPage" min="0"
+                               class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 font-mono"
+                               value="0">
+                    </div>
+                    <div class="input-group range-group hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Página
+                            Final</label>
+                        <input type="number" id="endPage" min="0"
+                               class="mt-1 w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-md p-3 font-mono"
+                               value="10">
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <button type="submit"
+                            class="btn-primary-action w-full py-3 rounded-md shadow-md text-lg flex items-center justify-center gap-2 bg-brandYellow hover:bg-brandYellow-dark text-brandBlue-dark font-bold transition-all">
+                        Ejecutar Simulación
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Contenedor de Errores Traducidos -->
+            <div id="errorContainer"
+                 class="hidden mt-4 p-4 bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 rounded-md border border-red-200 dark:border-red-900 text-sm space-y-1">
+            </div>
+        </div>
+
+        <!-- Panel de Resultado Inmediato -->
+        <div class="xl:w-1/3 flex flex-col">
+            <div
+                    class="quick-result-card rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 flex flex-col h-full items-center justify-between relative min-h-[320px] shadow-sm">
+                        <span
+                                class="text-xs font-bold text-brandBlue dark:text-brandYellow uppercase tracking-widest mb-4">Resultado
+                            Inmediato</span>
+
+                <!-- Contenido Inmediato Dinámico -->
+                <div id="quickResultContent" class="text-center w-full my-auto space-y-3">
+                    <div class="text-4xl text-brandBlue dark:text-slate-600 opacity-30 font-bold mb-4">---</div>
+                    <p class="text-sm text-gray-400">Esperando simulación...</p>
+                </div>
+
+                <!-- Botón de Desglose -->
+                <button id="btnShowDetails" type="button" onclick="openFullBreakdownView()"
+                        class="mt-4 w-full py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-brandBlue dark:text-brandYellow font-semibold text-sm rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors hidden flex items-center justify-center gap-2">
+                    Desglose de este resultado
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BIT INSPECTOR DIDÁCTICO INTEGRADOR -->
+    <div id="bitInspectorSection"
+         class="hidden bg-white dark:bg-slate-900 rounded-lg p-6 border border-gray-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b pb-3 border-gray-100 dark:border-slate-800">
+            <div>
+                <h3 class="text-lg font-bold text-brandBlue dark:text-white flex items-center gap-2">
+                    <i data-lucide="binary" class="w-5 h-5 text-brandYellow"></i>
+                    Inspector Binario & Desglose de Bits
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-slate-400">Representación lógica de la dirección de
+                    memoria virtual seleccionada.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="text" id="inspectorAddressInput" value="0x0000"
+                       oninput="onInspectorInputChange(this.value)"
+                       class="px-3 py-1.5 text-xs font-mono font-bold rounded border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-900 dark:text-white w-32 focus:outline-none"
+                       placeholder="Ej: 0x00A0 o P5">
+            </div>
+        </div>
+
+        <!-- Cajas de bits -->
+        <div class="space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold font-mono">
+                        <span class="text-brandBlue dark:text-blue-300 flex items-center gap-1">
+                            <span class="w-3 h-3 rounded-full bg-brandBlue inline-block"></span>
+                            VPN (Página): <span id="inspectorVpnBitsLabel">4 bits</span>
+                        </span>
+                <span class="text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                            Offset (Desplazamiento): <span id="inspectorOffsetBitsLabel">12 bits</span>
+                            <span class="w-3 h-3 rounded-full bg-brandYellow inline-block"></span>
+                        </span>
+            </div>
+
+            <div class="overflow-x-auto pb-2">
+                <div class="min-w-[480px]">
+                    <div id="bitIndicesRow"
+                         class="grid gap-1 mb-1 text-center font-mono text-[10px] text-gray-400 font-bold select-none">
+                    </div>
+                    <div id="bitBoxesRow" class="grid gap-1 font-mono text-xs sm:text-sm font-bold text-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

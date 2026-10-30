@@ -1,10 +1,26 @@
 tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                brandBlue: { DEFAULT: '#00497F', light: '#1a6198', dark: '#00335c' },
-                brandYellow: { DEFAULT: '#EFCB20', hover: '#d6b313', accent: '#fef3a3', light: '#f7df59', dark: '#c4a20f' }
+darkMode: 'class',
+theme: {
+    extend: {
+        colors: {
+            brandYellow: '#F5BE0B',
+            'brandYellow-dark': '#D9A107',
+            brandBlue: '#003B63',
+            'brandBlue-dark': '#002A47',
+            'brandBlue-light': '#0B4D7B',
+            institutional: {
+                gold: '#F5BE0B',
+                goldDark: '#D9A107',
+                navy: '#003B63',
+                navyDark: '#002A47',
+                navyLight: '#0B4D7B',
+                bg: '#F3F4F6'
             }
+        },
+        fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
         }
     }
-};
+}
+}
